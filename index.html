@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#F7F3EE">
+  <title>FamiliApp</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: #F7F3EE; color: #3D405B; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+    input::placeholder { color: #9993A6; opacity: .55; }
+    @keyframes si { from { opacity:0; transform:scale(.95) } to { opacity:1; transform:scale(1) } }
+    @keyframes fu { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+  <script type="text/babel">
+// ═══════════════════════════════════════════════════
+// FAMILIAPP - Kombinierter Prototyp
+// ═══════════════════════════════════════════════════
+
+// ── A: Einkauf & Küche ──────────────────────────
+const EinkaufApp = (() => {
+  const { useState } = React;
+
+const T = {
+  bg: "#F7F3EE", card: "#fff", pri: "#C25D45", pL: "#F5DCD5",
+  sec: "#3D405B", acc: "#52966E", aL: "#D5EADD", gld: "#D9A632",
+  gL: "#FDF4D8", txt: "#3D405B", mut: "#9993A6", bor: "#EAE3D9",
+  warn: "#E8A838", wL: "#FDF4D8", danger: "#D9534F", dL: "#FCEAEA",
+  sh: "0 1px 10px rgba(61,64,91,.05)",
+};
+const PF = "'Playfair Display',serif";
+const ist = { width: "100%", padding: "9px 12px", borderRadius: 10, border: "1.5px solid #EAE3D9", fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: "none" };
+const CSS = `@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',sans-serif;background:${T.bg};color:${T.txt}}input::placeholder{color:${T.mut};opacity:.55}@keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`;
+
+const INIT_VORRAT = [
+  { id: 1, name: "Vollmilch", emoji: "🥛", amount: 1, unit: "L", status: "yellow" },
+  { id: 2, name: "Eier", emoji: "🥚", amount: 12, unit: "Stk", status: "green" },
+  { id: 3, name: "Butter", emoji: "🧈", amount: 250, unit: "g", status: "green" },
+  { id: 4, name: "Mehl", emoji: "🌾", amount: 200, unit: "g", status: "yellow" },
+  { id: 5, name: "Zucker", emoji: "🍬", amount: 500, unit: "g", status: "green" },
+  { id: 6, name: "Nudeln", emoji: "🍝", amount: 500, unit: "g", status: "green" },
+  { id: 7, name: "Reis", emoji: "🍚", amount: 1, unit: "kg", status: "green" },
+  { id: 8, name: "Olivenöl", emoji: "🫒", amount: 0.5, unit: "L", status: "green" },
+  { id: 9, name: "Tomaten (Dose)", emoji: "🍅", amount: 2, unit: "Stk", status: "green" },
+  { id: 10, name: "Käse", emoji: "🧀", amount: 100, unit: "g", status: "yellow" },
+  { id: 11, name: "Brot", emoji: "🍞", amount: 0, unit: "Stk", status: "red" },
+  { id: 12, name: "Äpfel", emoji: "🍎", amount: 3, unit: "Stk", status: "green" },
+  { id: 13, name: "Kartoffeln", emoji: "🥔", amount: 1, unit: "kg", status: "green" },
+  { id: 14, name: "Zwiebeln", emoji: "🧅", amount: 4, unit: "Stk", status: "green" },
+  { id: 15, name: "Knoblauch", emoji: "🧄", amount: 1, unit: "Stk", status: "green" },
+  { id: 16, name: "Sahne", emoji: "🍶", amount: 200, unit: "ml", status: "green" },
+  { id: 17, name: "Schinken", emoji: "🥓", amount: 0, unit: "g", status: "red" },
+  { id: 18, name: "Joghurt", emoji: "🥣", amount: 2, unit: "Stk", status: "green" },
+];
+
+const INIT_LISTE = [
+  { id: 101, name: "Brot", emoji: "🍞", amount: 1, unit: "Stk", done: false, from: "vorrat" },
+  { id: 102, name: "Schinken", emoji: "🥓", amount: 200, unit: "g", done: false, from: "vorrat" },
+  { id: 103, name: "Bananen", emoji: "🍌", amount: 6, unit: "Stk", done: false, from: "manual" },
+];
+
+const REZEPTE = [
+  { id: 1, name: "Spaghetti Carbonara", emoji: "🍝", time: "25 Min", zutaten: ["Nudeln", "Eier", "Käse", "Schinken", "Sahne"], desc: "Klassiker – cremig & schnell" },
+  { id: 2, name: "Kartoffelpuffer", emoji: "🥔", time: "30 Min", zutaten: ["Kartoffeln", "Eier", "Mehl", "Zwiebeln"], desc: "Knusprig gebraten, Kinder lieben sie" },
+  { id: 3, name: "Pfannkuchen", emoji: "🥞", time: "20 Min", zutaten: ["Mehl", "Eier", "Vollmilch", "Zucker", "Butter"], desc: "Süß oder herzhaft – immer gut" },
+  { id: 4, name: "Tomatenreis", emoji: "🍅", time: "25 Min", zutaten: ["Reis", "Tomaten (Dose)", "Zwiebeln", "Knoblauch", "Olivenöl"], desc: "Einfach, günstig, lecker" },
+  { id: 5, name: "Apfel-Joghurt Bowl", emoji: "🍎", time: "5 Min", zutaten: ["Äpfel", "Joghurt", "Zucker"], desc: "Schneller gesunder Snack" },
+  { id: 6, name: "Käsebrot", emoji: "🧀", time: "5 Min", zutaten: ["Brot", "Käse", "Butter"], desc: "Der Klassiker für zwischendurch" },
+];
+
+const UNITS = ["Stk", "g", "kg", "ml", "L", "Pkg"];
+const AMP = { green: { icon: "🟢", label: "Genug", bg: T.aL, color: T.acc }, yellow: { icon: "🟡", label: "Knapp", bg: T.wL, color: T.warn }, red: { icon: "🔴", label: "Leer", bg: T.dL, color: T.danger } };
+const NEXT_STATUS = { green: "yellow", yellow: "red", red: "green" };
+
+function Btn({ children, onClick, color, bg, style: s, disabled }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      padding: "7px 12px", borderRadius: 10, border: "none",
+      background: bg || (color || T.pri) + "18",
+      color: bg ? "#fff" : (color || T.pri),
+      fontWeight: 700, fontSize: 12, cursor: disabled ? "default" : "pointer",
+      fontFamily: "'Outfit',sans-serif", opacity: disabled ? 0.5 : 1, ...s
+    }}>{children}</button>
+  );
+}
+
+function Card({ children, style: s }) {
+  return <div style={{ background: T.card, borderRadius: 14, padding: 14, boxShadow: T.sh, border: "1px solid " + T.bor, ...s }}>{children}</div>;
+}
+
+function SL({ children }) {
+  return <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7, marginTop: 16 }}>{children}</p>;
+}
+
+function Header({ sub }) {
+  return (
+    <div style={{ padding: "16px 16px 10px", background: "linear-gradient(180deg,white," + T.bg + ")", position: "sticky", top: 0, zIndex: 50 }}>
+      <h1 style={{ fontFamily: PF, fontWeight: 800, fontSize: 24, background: "linear-gradient(135deg," + T.pri + "," + T.sec + ")", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FamiliApp</h1>
+      <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>{sub}</p>
+    </div>
+  );
+}
+
+function Overlay({ children }) {
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
+      <div style={{ background: T.card, borderRadius: 20, padding: 24, maxWidth: 380, width: "100%", animation: "si .25s ease both" }}>{children}</div>
+    </div>
+  );
+}
+
+function _Main({ onBack }) {
+  const [sub, setSub] = useState("vorrat");
+  const [vorrat, setVorrat] = useState(INIT_VORRAT);
+  const [liste, setListe] = useState(INIT_LISTE);
+  const [search, setSearch] = useState("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [addN, setAddN] = useState("");
+  const [addA, setAddA] = useState("");
+  const [addU, setAddU] = useState("Stk");
+  const [addE, setAddE] = useState("🛒");
+  const [addL, setAddL] = useState(false);
+  const [newL, setNewL] = useState("");
+  const [editV, setEditV] = useState(null);
+  const [listening, setListening] = useState(false);
+  const [showRezept, setShowRezept] = useState(null);
+  const [rezepte, setRezepte] = useState(REZEPTE);
+  const [showImport, setShowImport] = useState(null); // null | "link" | "foto" | "text" | "manuell"
+  const [importLink, setImportLink] = useState("");
+  const [importText, setImportText] = useState("");
+  const [manName, setManName] = useState("");
+  const [manEmoji, setManEmoji] = useState("🍽️");
+  const [manTime, setManTime] = useState("");
+  const [manDesc, setManDesc] = useState("");
+  const [manZutaten, setManZutaten] = useState("");
+  const [importSuccess, setImportSuccess] = useState(false);
+
+  const vorratNames = vorrat.map(v => v.name.toLowerCase());
+  const alertItems = vorrat.filter(v => v.status === "yellow" || v.status === "red");
+  const listeOpen = liste.filter(l => !l.done);
+  const listeDone = liste.filter(l => l.done);
+
+  const filtered = search.trim()
+    ? vorrat.filter(v => v.name.toLowerCase().includes(search.toLowerCase()))
+    : vorrat;
+
+  const sortedVorrat = [...filtered].sort((a, b) => {
+    const order = { red: 0, yellow: 1, green: 2 };
+    return order[a.status] - order[b.status];
+  });
+
+  const toggleStatus = id => {
+    setVorrat(vorrat.map(v => v.id === id ? { ...v, status: NEXT_STATUS[v.status] } : v));
+  };
+
+  const toList = item => {
+    if (liste.some(l => l.name === item.name && !l.done)) return;
+    setListe([...liste, { id: Date.now(), name: item.name, emoji: item.emoji, amount: item.amount, unit: item.unit, done: false, from: "vorrat" }]);
+  };
+
+  const addVorrat = () => {
+    if (!addN.trim()) return;
+    const nv = { id: Date.now(), name: addN.trim(), emoji: addE, amount: parseFloat(addA) || 0, unit: addU, status: "green" };
+    setVorrat([...vorrat, nv]);
+    if (addL) toList(nv);
+    setShowAdd(false); setAddN(""); setAddA(""); setAddU("Stk"); setAddE("🛒"); setAddL(false);
+  };
+
+  const updateVorrat = () => {
+    if (!editV) return;
+    setVorrat(vorrat.map(v => v.id === editV.id ? editV : v));
+    setEditV(null);
+  };
+
+  const removeVorrat = id => {
+    setVorrat(vorrat.filter(v => v.id !== id));
+    setEditV(null);
+  };
+
+  const addListeItem = () => {
+    if (!newL.trim()) return;
+    setListe([...liste, { id: Date.now(), name: newL.trim(), emoji: "🛒", amount: 1, unit: "Stk", done: false, from: "manual" }]);
+    setNewL("");
+  };
+
+  const toggleListeItem = id => {
+    setListe(liste.map(l => l.id === id ? { ...l, done: !l.done } : l));
+  };
+
+  const removeListeItem = id => {
+    setListe(liste.filter(l => l.id !== id));
+  };
+
+  const startListening = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setSearch("(Spracheingabe nicht verfügbar)");
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang = "de-DE";
+    rec.onresult = e => { setSearch(e.results[0][0].transcript); setListening(false); };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    setListening(true);
+    rec.start();
+  };
+
+  const checkZutat = name => vorrat.some(v => v.name.toLowerCase() === name.toLowerCase() && v.status !== "red");
+
+  const rezeptMatch = r => {
+    const have = r.zutaten.filter(z => checkZutat(z)).length;
+    return { have, total: r.zutaten.length, pct: Math.round(have / r.zutaten.length * 100) };
+  };
+
+  const sortedRezepte = [...rezepte].sort((a, b) => rezeptMatch(b).pct - rezeptMatch(a).pct);
+
+  const EMOJIS_R = ["🍽️","🍝","🥗","🍲","🍛","🥘","🍜","🍕","🥙","🍰","🧁","🥧","🍳","🥞","🍔"];
+
+  const resetImport = () => {
+    setShowImport(null); setImportLink(""); setImportText("");
+    setManName(""); setManEmoji("🍽️"); setManTime(""); setManDesc(""); setManZutaten("");
+    setImportSuccess(false);
+  };
+
+  const simulateImport = (source) => {
+    const fakeRecipes = {
+      link: { name: "Lasagne al Forno", emoji: "🍝", time: "60 Min", zutaten: ["Nudeln", "Tomaten (Dose)", "Käse", "Zwiebeln", "Knoblauch", "Olivenöl"], desc: "Importiert von Chefkoch" },
+      foto: { name: "Omas Apfelkuchen", emoji: "🍰", time: "45 Min", zutaten: ["Äpfel", "Mehl", "Zucker", "Butter", "Eier"], desc: "Erkannt aus Foto" },
+      text: { name: "Griechischer Salat", emoji: "🥗", time: "15 Min", zutaten: ["Tomaten (Dose)", "Olivenöl", "Zwiebeln"], desc: "Aus Text importiert" },
+    };
+    const r = fakeRecipes[source];
+    if (r) {
+      setRezepte(prev => [...prev, { id: Date.now(), ...r }]);
+      setImportSuccess(true);
+      setTimeout(() => resetImport(), 1500);
+    }
+  };
+
+  const addManualRecipe = () => {
+    if (!manName.trim() || !manZutaten.trim()) return;
+    const zArr = manZutaten.split(",").map(z => z.trim()).filter(Boolean);
+    setRezepte(prev => [...prev, { id: Date.now(), name: manName.trim(), emoji: manEmoji, time: manTime.trim() || "? Min", zutaten: zArr, desc: manDesc.trim() || "Eigenes Rezept" }]);
+    setImportSuccess(true);
+    setTimeout(() => resetImport(), 1500);
+  };
+
+  // ── Tab Bar ──
+  const tabs = [
+    { id: "vorrat", label: "Vorräte", icon: "🏠" },
+    { id: "liste", label: "Einkauf", icon: "🛒", badge: listeOpen.length },
+    { id: "rezepte", label: "Rezepte", icon: "🍳" },
+  ];
+
+  // ── VORRÄTE ──
+  if (sub === "vorrat") return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif", paddingBottom: 80 }}>
+      <style>{CSS}</style>
+      <Header sub="Einkauf & Küche" />
+      <div style={{ padding: "0 16px" }}>
+        <h2 style={{ fontFamily: PF, fontWeight: 700, fontSize: 21, marginBottom: 3 }}>🏠 Vorräte</h2>
+        <p style={{ fontSize: 12, color: T.mut, marginBottom: 12 }}>{vorrat.length} Artikel · {alertItems.length} knapp/leer</p>
+
+        <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Vorrat suchen..." style={{ ...ist, paddingRight: 36, paddingLeft: 32 }} />
+            <span style={{ position: "absolute", left: 10, top: 9, fontSize: 14, pointerEvents: "none" }}>🔍</span>
+            {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 10, top: 7, background: "none", border: "none", fontSize: 16, cursor: "pointer", color: T.mut }}>✕</button>}
+          </div>
+          <button onClick={startListening} style={{ width: 40, height: 40, borderRadius: 10, border: listening ? "2px solid " + T.pri : "1.5px solid " + T.bor, background: listening ? T.pL : T.card, fontSize: 18, cursor: "pointer", animation: listening ? "pu 1s infinite" : "none" }}>🎤</button>
+        </div>
+
+        {alertItems.length > 0 && !search && (
+          <Card style={{ marginBottom: 14, borderLeft: "4px solid " + T.warn, background: "linear-gradient(135deg," + T.wL + "," + T.card + ")" }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: T.warn, textTransform: "uppercase", marginBottom: 6 }}>⚠️ Achtung – nachkaufen!</p>
+            {alertItems.slice(0, 4).map(item => (
+              <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <span>{item.emoji}</span>
+                <span style={{ flex: 1, fontSize: 12, fontWeight: 600 }}>{item.name}</span>
+                <span style={{ fontSize: 11, color: AMP[item.status].color, fontWeight: 700 }}>
+                  {item.status === "red" ? "Leer!" : item.amount + " " + item.unit}
+                </span>
+                {!liste.some(l => l.name === item.name && !l.done) && (
+                  <button onClick={() => toList(item)} style={{ background: T.pri + "18", border: "none", borderRadius: 8, padding: "3px 8px", fontSize: 10, fontWeight: 700, color: T.pri, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+ 🛒</button>
+                )}
+                {liste.some(l => l.name === item.name && !l.done) && (
+                  <span style={{ fontSize: 10, color: T.acc, fontWeight: 700 }}>✓ Liste</span>
+                )}
+              </div>
+            ))}
+            {alertItems.length > 4 && <p style={{ fontSize: 10, color: T.mut, marginTop: 4 }}>+{alertItems.length - 4} weitere</p>}
+          </Card>
+        )}
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <SL>{search ? "Suchergebnisse" : "Alle Vorräte"}</SL>
+          <span style={{ fontSize: 10, color: T.mut }}>{sortedVorrat.length} Artikel</span>
+        </div>
+
+        {sortedVorrat.length === 0 && search && (
+          <Card style={{ textAlign: "center", padding: 20 }}>
+            <p style={{ fontSize: 13, color: T.mut }}>Nichts gefunden für „{search}"</p>
+            <Btn onClick={() => { setAddN(search); setShowAdd(true); setSearch(""); }} color={T.pri} style={{ marginTop: 8 }}>+ „{search}" hinzufügen</Btn>
+          </Card>
+        )}
+
+        {sortedVorrat.map(item => {
+          const a = AMP[item.status];
+          const onList = liste.some(l => l.name === item.name && !l.done);
+          return (
+            <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.card, borderRadius: 12, marginBottom: 6, border: "1px solid " + T.bor, borderLeft: "4px solid " + a.color, animation: "fu .3s ease both" }}>
+              <span style={{ fontSize: 22 }}>{item.emoji}</span>
+              <div style={{ flex: 1 }} onClick={() => setEditV({ ...item })}>
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{item.name}</div>
+                <div style={{ fontSize: 11, color: T.mut }}>{item.amount} {item.unit}</div>
+              </div>
+              <button onClick={() => toggleStatus(item.id)} style={{ background: a.bg, border: "none", borderRadius: 8, padding: "4px 8px", fontSize: 11, fontWeight: 700, color: a.color, cursor: "pointer", fontFamily: "'Outfit',sans-serif", minWidth: 60, textAlign: "center" }}>
+                {a.icon} {a.label}
+              </button>
+              {item.status !== "green" && !onList && (
+                <button onClick={() => toList(item)} style={{ background: T.pri + "18", border: "none", borderRadius: 8, padding: "4px 7px", fontSize: 13, cursor: "pointer" }} title="Auf Einkaufsliste">🛒</button>
+              )}
+              {onList && <span style={{ fontSize: 11, color: T.acc }}>✓</span>}
+            </div>
+          );
+        })}
+
+        <Btn onClick={() => setShowAdd(true)} bg={T.pri} style={{ width: "100%", textAlign: "center", padding: 12, marginTop: 12 }}>+ Neuer Vorrat</Btn>
+      </div>
+
+      {showAdd && (
+        <Overlay>
+          <h3 style={{ fontFamily: PF, fontSize: 18, marginBottom: 14, textAlign: "center" }}>🏠 Neuer Vorrat</h3>
+          <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {["🥛","🥚","🧈","🍞","🧀","🥩","🐟","🥕","🍎","🫒","🌾","🍬","🛒"].map(e => (
+                <button key={e} onClick={() => setAddE(e)} style={{ width: 32, height: 32, borderRadius: 8, fontSize: 16, border: addE === e ? "2px solid " + T.pri : "1px solid " + T.bor, background: addE === e ? T.pL : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>{e}</button>
+              ))}
+            </div>
+          </div>
+          <input value={addN} onChange={e => setAddN(e.target.value)} placeholder="Name (z.B. Vollmilch)" autoFocus style={{ ...ist, marginBottom: 8 }} />
+          <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+            <input value={addA} onChange={e => setAddA(e.target.value)} placeholder="Menge" type="number" style={{ ...ist, flex: 1 }} />
+            <select value={addU} onChange={e => setAddU(e.target.value)} style={{ ...ist, width: 70, background: "#fff" }}>
+              {UNITS.map(u => <option key={u}>{u}</option>)}
+            </select>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 600, marginBottom: 14, cursor: "pointer" }}>
+            <input type="checkbox" checked={addL} onChange={e => setAddL(e.target.checked)} />
+            Auch auf Einkaufsliste setzen
+          </label>
+          <div style={{ display: "flex", gap: 6 }}>
+            <Btn onClick={() => setShowAdd(false)} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Abbrechen</Btn>
+            <Btn onClick={addVorrat} bg={T.pri} style={{ flex: 1, textAlign: "center" }} disabled={!addN.trim()}>Hinzufügen</Btn>
+          </div>
+        </Overlay>
+      )}
+
+      {editV && (
+        <Overlay>
+          <h3 style={{ fontFamily: PF, fontSize: 18, marginBottom: 14, textAlign: "center" }}>{editV.emoji} {editV.name}</h3>
+          <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+            <input value={editV.amount} onChange={e => setEditV({ ...editV, amount: parseFloat(e.target.value) || 0 })} type="number" style={{ ...ist, flex: 1 }} />
+            <select value={editV.unit} onChange={e => setEditV({ ...editV, unit: e.target.value })} style={{ ...ist, width: 70, background: "#fff" }}>
+              {UNITS.map(u => <option key={u}>{u}</option>)}
+            </select>
+          </div>
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            {["green", "yellow", "red"].map(st => (
+              <button key={st} onClick={() => setEditV({ ...editV, status: st })} style={{ flex: 1, padding: "8px 0", borderRadius: 10, border: editV.status === st ? "2.5px solid " + AMP[st].color : "1.5px solid " + T.bor, background: editV.status === st ? AMP[st].bg : "#fff", cursor: "pointer", textAlign: "center", fontFamily: "'Outfit',sans-serif" }}>
+                <span style={{ fontSize: 16, display: "block" }}>{AMP[st].icon}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: AMP[st].color }}>{AMP[st].label}</span>
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <Btn onClick={() => removeVorrat(editV.id)} color={T.danger} style={{ textAlign: "center" }}>🗑️</Btn>
+            <Btn onClick={() => setEditV(null)} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Abbrechen</Btn>
+            <Btn onClick={updateVorrat} bg={T.pri} style={{ flex: 1, textAlign: "center" }}>Speichern</Btn>
+          </div>
+        </Overlay>
+      )}
+
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: T.card, borderTop: "1px solid " + T.bor, display: "flex", justifyContent: "center", gap: 0, zIndex: 100, maxWidth: 420, margin: "0 auto" }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setSub(t.id)} style={{ flex: 1, padding: "10px 0 8px", background: "none", border: "none", cursor: "pointer", fontFamily: "'Outfit',sans-serif", opacity: sub === t.id ? 1 : 0.5, borderTop: sub === t.id ? "2.5px solid " + T.pri : "2.5px solid transparent", position: "relative" }}>
+            <span style={{ fontSize: 20, display: "block" }}>{t.icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: sub === t.id ? T.pri : T.mut }}>{t.label}</span>
+            {t.badge > 0 && <span style={{ position: "absolute", top: 4, right: "25%", background: T.pri, color: "#fff", fontSize: 9, fontWeight: 800, borderRadius: 10, padding: "1px 5px", minWidth: 16, textAlign: "center" }}>{t.badge}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── EINKAUFSLISTE ──
+  if (sub === "liste") return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif", paddingBottom: 80 }}>
+      <style>{CSS}</style>
+      <Header sub="Einkauf & Küche" />
+      <div style={{ padding: "0 16px" }}>
+        <h2 style={{ fontFamily: PF, fontWeight: 700, fontSize: 21, marginBottom: 3 }}>🛒 Einkaufsliste</h2>
+        <p style={{ fontSize: 12, color: T.mut, marginBottom: 12 }}>{listeOpen.length} offen · {listeDone.length} erledigt</p>
+
+        <div style={{ display: "flex", gap: 5, marginBottom: 14 }}>
+          <input value={newL} onChange={e => setNewL(e.target.value)} placeholder="Artikel hinzufügen..." onKeyDown={e => e.key === "Enter" && addListeItem()} style={{ ...ist, flex: 1 }} />
+          <Btn onClick={addListeItem} bg={T.pri}>+</Btn>
+        </div>
+
+        {listeOpen.length === 0 && listeDone.length === 0 && (
+          <Card style={{ textAlign: "center", padding: 24 }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
+            <p style={{ fontSize: 14, fontWeight: 600 }}>Alles eingekauft!</p>
+            <p style={{ fontSize: 12, color: T.mut }}>Die Liste ist leer</p>
+          </Card>
+        )}
+
+        {listeOpen.map(item => (
+          <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.card, borderRadius: 12, marginBottom: 6, border: "1px solid " + T.bor, animation: "fu .3s ease both" }}>
+            <button onClick={() => toggleListeItem(item.id)} style={{ width: 24, height: 24, borderRadius: 7, border: "2px solid " + T.bor, background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}></button>
+            <span style={{ fontSize: 18 }}>{item.emoji}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>{item.name}</div>
+              <div style={{ fontSize: 11, color: T.mut }}>{item.amount} {item.unit}</div>
+            </div>
+            {item.from === "vorrat" && <span style={{ fontSize: 9, color: T.acc, fontWeight: 700, background: T.aL, padding: "2px 6px", borderRadius: 6 }}>Vorrat</span>}
+            <button onClick={() => removeListeItem(item.id)} style={{ background: "none", border: "none", fontSize: 14, cursor: "pointer", color: T.mut }}>✕</button>
+          </div>
+        ))}
+
+        {listeDone.length > 0 && (
+          <div>
+            <SL>✅ Erledigt</SL>
+            {listeDone.map(item => (
+              <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: T.bg, borderRadius: 12, marginBottom: 4, opacity: 0.5 }}>
+                <button onClick={() => toggleListeItem(item.id)} style={{ width: 24, height: 24, borderRadius: 7, border: "2px solid " + T.acc, background: T.aL, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: T.acc }}>✓</button>
+                <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                <span style={{ flex: 1, fontSize: 13, textDecoration: "line-through" }}>{item.name}</span>
+                <button onClick={() => removeListeItem(item.id)} style={{ background: "none", border: "none", fontSize: 14, cursor: "pointer", color: T.mut }}>✕</button>
+              </div>
+            ))}
+            <Btn onClick={() => setListe(liste.filter(l => !l.done))} color={T.mut} style={{ width: "100%", textAlign: "center", marginTop: 8 }}>Erledigte löschen</Btn>
+          </div>
+        )}
+      </div>
+
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: T.card, borderTop: "1px solid " + T.bor, display: "flex", justifyContent: "center", gap: 0, zIndex: 100, maxWidth: 420, margin: "0 auto" }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setSub(t.id)} style={{ flex: 1, padding: "10px 0 8px", background: "none", border: "none", cursor: "pointer", fontFamily: "'Outfit',sans-serif", opacity: sub === t.id ? 1 : 0.5, borderTop: sub === t.id ? "2.5px solid " + T.pri : "2.5px solid transparent", position: "relative" }}>
+            <span style={{ fontSize: 20, display: "block" }}>{t.icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: sub === t.id ? T.pri : T.mut }}>{t.label}</span>
+            {t.badge > 0 && <span style={{ position: "absolute", top: 4, right: "25%", background: T.pri, color: "#fff", fontSize: 9, fontWeight: 800, borderRadius: 10, padding: "1px 5px", minWidth: 16, textAlign: "center" }}>{t.badge}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── REZEPTE ──
+  return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif", paddingBottom: 80 }}>
+      <style>{CSS}</style>
+      <Header sub="Einkauf & Küche" />
+      <div style={{ padding: "0 16px" }}>
+        <SL>Rezept hinzufügen</SL>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 18 }}>
+          {[
+            { key: "link", icon: "🔗", label: "Link einfügen", desc: "Von Chefkoch, Lecker & Co.", bg: "#E8F0FE", bc: "#4285F4" },
+            { key: "foto", icon: "📸", label: "Foto aufnehmen", desc: "Aus Kochbuch oder Zettel", bg: "#FEF3E0", bc: T.gld },
+            { key: "text", icon: "📋", label: "Text einfügen", desc: "Copy & Paste", bg: "#E8F5E9", bc: T.acc },
+            { key: "manuell", icon: "✏️", label: "Manuell eintippen", desc: "Omas Geheimrezept", bg: T.pL, bc: T.pri },
+          ].map((m, i) => (
+            <div key={m.key} onClick={() => setShowImport(m.key)} style={{
+              background: T.card, borderRadius: 14, padding: 14, cursor: "pointer",
+              border: "1.5px solid " + T.bor, boxShadow: T.sh,
+              transition: "transform .15s ease, box-shadow .15s ease",
+              animation: `fu .3s ease ${.05 + i * .06}s both`,
+            }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: m.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, marginBottom: 8, border: "1.5px solid " + m.bc + "33" }}>{m.icon}</div>
+              <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 10, color: T.mut, lineHeight: 1.3 }}>{m.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        <h2 style={{ fontFamily: PF, fontWeight: 700, fontSize: 21, marginBottom: 3 }}>🍳 Rezept-Vorschläge</h2>
+        <p style={{ fontSize: 12, color: T.mut, marginBottom: 12 }}>Basierend auf deinen Vorräten · {rezepte.length} Rezepte</p>
+
+        {sortedRezepte.map(r => {
+          const m = rezeptMatch(r);
+          const canCook = m.pct === 100;
+          const barColor = canCook ? T.acc : m.pct >= 60 ? T.warn : T.danger;
+          return (
+            <Card key={r.id} style={{ marginBottom: 10, cursor: "pointer", borderLeft: "4px solid " + barColor }} onClick={() => setShowRezept(r)}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 32 }}>{r.emoji}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</div>
+                  <div style={{ fontSize: 11, color: T.mut }}>{r.desc}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                    <div style={{ flex: 1, height: 5, background: T.bor, borderRadius: 5, overflow: "hidden" }}>
+                      <div style={{ width: m.pct + "%", height: "100%", background: barColor, borderRadius: 5 }} />
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: barColor }}>{m.have}/{m.total}</span>
+                    <span style={{ fontSize: 10, color: T.mut }}>⏱ {r.time}</span>
+                  </div>
+                </div>
+                {canCook && <span style={{ fontSize: 11, fontWeight: 700, color: T.acc, background: T.aL, padding: "3px 8px", borderRadius: 8 }}>Machbar!</span>}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {showRezept && (
+        <Overlay>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <span style={{ fontSize: 40 }}>{showRezept.emoji}</span>
+            <h3 style={{ fontFamily: PF, fontSize: 20, marginTop: 4 }}>{showRezept.name}</h3>
+            <p style={{ fontSize: 12, color: T.mut }}>⏱ {showRezept.time}</p>
+          </div>
+          <SL>Zutaten</SL>
+          {showRezept.zutaten.map((z, i) => {
+            const have = checkZutat(z);
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", borderBottom: i < showRezept.zutaten.length - 1 ? "1px solid " + T.bor : "none" }}>
+                <span style={{ fontSize: 16 }}>{have ? "✅" : "❌"}</span>
+                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: have ? T.txt : T.danger }}>{z}</span>
+                {!have && !liste.some(l => l.name === z && !l.done) && (
+                  <button onClick={() => { setListe([...liste, { id: Date.now() + i, name: z, emoji: "🛒", amount: 1, unit: "Stk", done: false, from: "rezept" }]); }} style={{ background: T.pri + "18", border: "none", borderRadius: 8, padding: "3px 8px", fontSize: 10, fontWeight: 700, color: T.pri, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+ 🛒</button>
+                )}
+                {!have && liste.some(l => l.name === z && !l.done) && (
+                  <span style={{ fontSize: 10, color: T.acc, fontWeight: 700 }}>✓ Liste</span>
+                )}
+              </div>
+            );
+          })}
+          <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
+            <Btn onClick={() => setShowRezept(null)} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Schließen</Btn>
+            {showRezept.id > 6 && (
+              <Btn onClick={() => { setRezepte(prev => prev.filter(r => r.id !== showRezept.id)); setShowRezept(null); }} color={T.danger} style={{ textAlign: "center" }}>🗑️</Btn>
+            )}
+            {showRezept.zutaten.some(z => !checkZutat(z) && !liste.some(l => l.name === z && !l.done)) && (
+              <Btn onClick={() => {
+                showRezept.zutaten.forEach((z, i) => {
+                  if (!checkZutat(z) && !liste.some(l => l.name === z && !l.done)) {
+                    setListe(prev => [...prev, { id: Date.now() + i, name: z, emoji: "🛒", amount: 1, unit: "Stk", done: false, from: "rezept" }]);
+                  }
+                });
+              }} bg={T.pri} style={{ flex: 1, textAlign: "center" }}>Fehlende → 🛒</Btn>
+            )}
+          </div>
+        </Overlay>
+      )}
+
+      {showImport && (
+        <Overlay>
+          {importSuccess ? (
+            <div style={{ textAlign: "center", padding: 20 }}>
+              <span style={{ fontSize: 48, display: "block", marginBottom: 10 }}>✅</span>
+              <h3 style={{ fontFamily: PF, fontSize: 18 }}>Rezept gespeichert!</h3>
+              <p style={{ fontSize: 12, color: T.mut, marginTop: 4 }}>Wurde zu deinen Rezepten hinzugefügt</p>
+            </div>
+          ) : showImport === "link" ? (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 14 }}>
+                <span style={{ fontSize: 36 }}>🔗</span>
+                <h3 style={{ fontFamily: PF, fontSize: 18, marginTop: 4 }}>Link importieren</h3>
+              </div>
+              <input value={importLink} onChange={e => setImportLink(e.target.value)} placeholder="Link zum Rezept einfügen..." style={ist} />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
+                {["Chefkoch", "Lecker", "EatSmarter", "KochBar"].map(s => (
+                  <span key={s} style={{ fontSize: 9, background: "#E8F0FE", color: "#4285F4", padding: "2px 7px", borderRadius: 6, fontWeight: 600 }}>{s}</span>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
+                <Btn onClick={resetImport} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Abbrechen</Btn>
+                <Btn onClick={() => simulateImport("link")} bg={T.pri} disabled={!importLink.trim()} style={{ flex: 1, textAlign: "center" }}>📥 Importieren</Btn>
+              </div>
+            </>
+          ) : showImport === "foto" ? (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 14 }}>
+                <span style={{ fontSize: 36 }}>📸</span>
+                <h3 style={{ fontFamily: PF, fontSize: 18, marginTop: 4 }}>Foto importieren</h3>
+              </div>
+              <div style={{ background: T.bg, borderRadius: 14, border: "2px dashed " + T.bor, padding: 30, textAlign: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: 32, display: "block", marginBottom: 6 }}>📷</span>
+                <p style={{ fontSize: 12, fontWeight: 600, color: T.sec }}>Foto aufnehmen</p>
+                <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>oder aus Galerie wählen</p>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+                <Btn onClick={resetImport} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Abbrechen</Btn>
+                <Btn onClick={() => simulateImport("foto")} bg={T.gld} style={{ flex: 1, textAlign: "center" }}>📸 Erkennen</Btn>
+              </div>
+            </>
+          ) : showImport === "text" ? (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 14 }}>
+                <span style={{ fontSize: 36 }}>📋</span>
+                <h3 style={{ fontFamily: PF, fontSize: 18, marginTop: 4 }}>Text einfügen</h3>
+              </div>
+              <textarea value={importText} onChange={e => setImportText(e.target.value)} placeholder="Rezepttext hier einfügen..." rows={5} style={{ ...ist, resize: "vertical", minHeight: 100 }} />
+              <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
+                <Btn onClick={resetImport} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Abbrechen</Btn>
+                <Btn onClick={() => simulateImport("text")} bg={T.acc} disabled={!importText.trim()} style={{ flex: 1, textAlign: "center" }}>📋 Importieren</Btn>
+              </div>
+            </>
+          ) : showImport === "manuell" ? (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 14 }}>
+                <span style={{ fontSize: 36 }}>✏️</span>
+                <h3 style={{ fontFamily: PF, fontSize: 18, marginTop: 4 }}>Manuell eintragen</h3>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: T.mut, marginBottom: 3, display: "block" }}>Rezeptname *</label>
+                  <input value={manName} onChange={e => setManName(e.target.value)} placeholder="z.B. Omas Gulasch" style={ist} />
+                </div>
+                <div style={{ width: 55 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: T.mut, marginBottom: 3, display: "block" }}>Emoji</label>
+                  <select value={manEmoji} onChange={e => setManEmoji(e.target.value)} style={{ ...ist, padding: "9px 4px", fontSize: 18, textAlign: "center" }}>
+                    {EMOJIS_R.map(e => <option key={e} value={e}>{e}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: T.mut, marginBottom: 3, display: "block" }}>Zubereitungszeit</label>
+                  <input value={manTime} onChange={e => setManTime(e.target.value)} placeholder="z.B. 30 Min" style={ist} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: 10, fontWeight: 700, color: T.mut, marginBottom: 3, display: "block" }}>Beschreibung</label>
+                  <input value={manDesc} onChange={e => setManDesc(e.target.value)} placeholder="Kurze Beschreibung" style={ist} />
+                </div>
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 700, color: T.mut, marginBottom: 3, display: "block" }}>Zutaten * <span style={{ fontWeight: 400 }}>(Komma-getrennt)</span></label>
+                <textarea value={manZutaten} onChange={e => setManZutaten(e.target.value)} placeholder="z.B. Rindfleisch, Zwiebeln, Paprika, Kartoffeln" rows={3} style={{ ...ist, resize: "vertical" }} />
+              </div>
+              <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+                <Btn onClick={resetImport} color={T.mut} style={{ flex: 1, textAlign: "center" }}>Abbrechen</Btn>
+                <Btn onClick={addManualRecipe} bg={T.pri} disabled={!manName.trim() || !manZutaten.trim()} style={{ flex: 1, textAlign: "center" }}>✅ Speichern</Btn>
+              </div>
+            </>
+          ) : null}
+        </Overlay>
+      )}
+
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: T.card, borderTop: "1px solid " + T.bor, display: "flex", justifyContent: "center", gap: 0, zIndex: 100, maxWidth: 420, margin: "0 auto" }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setSub(t.id)} style={{ flex: 1, padding: "10px 0 8px", background: "none", border: "none", cursor: "pointer", fontFamily: "'Outfit',sans-serif", opacity: sub === t.id ? 1 : 0.5, borderTop: sub === t.id ? "2.5px solid " + T.pri : "2.5px solid transparent", position: "relative" }}>
+            <span style={{ fontSize: 20, display: "block" }}>{t.icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: sub === t.id ? T.pri : T.mut }}>{t.label}</span>
+            {t.badge > 0 && <span style={{ position: "absolute", top: 4, right: "25%", background: T.pri, color: "#fff", fontSize: 9, fontWeight: 800, borderRadius: 10, padding: "1px 5px", minWidth: 16, textAlign: "center" }}>{t.badge}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+  return function(props) {
+    return React.createElement("div", null,
+      React.createElement("div", {
+        onClick: props.onBack,
+        style: { position:"fixed", top:0, left:0, right:0, zIndex:999, maxWidth:420, margin:"0 auto",
+          background:"linear-gradient(180deg,#F7F3EE,rgba(247,243,238,.9))", 
+          padding:"8px 16px 4px", display:"flex", alignItems:"center", gap:8, cursor:"pointer" }
+      },
+        React.createElement("span", { style:{ fontSize:18 } }, "←"),
+        React.createElement("span", { style:{ fontSize:12, fontWeight:700, color:"#9993A6", fontFamily:"'Outfit',sans-serif" } }, "Home")
+      ),
+      React.createElement("div", { style:{ paddingTop:32 } },
+        React.createElement(_Main, props)
+      )
+    );
+  };
+})();
+
+// ── B1: Aufgaben & Belohnungen ──────────────────
+const AufgabenApp = (() => {
+  const { useState } = React;
+
+const FAM = [
+  { id: "mama", name: "Mama", emoji: "👩", role: "parent", color: "#C25D45" },
+  { id: "papa", name: "Papa", emoji: "👨", role: "parent", color: "#4A5899" },
+  { id: "kind", name: "Luca", emoji: "🧒", role: "child", color: "#52966E" },
+];
+const gm = (id) => FAM.find((m) => m.id === id) || FAM[0];
+
+const T = {
+  bg: "#F7F3EE", card: "#fff", pri: "#C25D45", pL: "#F5DCD5",
+  sec: "#3D405B", acc: "#52966E", aL: "#D5EADD", gld: "#D9A632",
+  gL: "#FDF4D8", txt: "#3D405B", mut: "#9993A6", bor: "#EAE3D9",
+  sh: "0 1px 10px rgba(61,64,91,.05)",
+};
+
+const ist = { width: "100%", padding: "9px 12px", borderRadius: 10, border: "1.5px solid #EAE3D9", fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: "none", marginBottom: 6 };
+
+const FREQS = ["Einmalig", "Täglich", "Wöchentlich", "2-wöchentlich", "Monatlich", "Halbjährlich", "Jährlich"];
+const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const TIMES = ["Morgens", "Nachmittags", "Abends"];
+
+function Btn({ children, onClick, color, bg, full, disabled, pulse }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      padding: "5px 10px", borderRadius: 10, border: "none",
+      background: bg || (color + "18"), color: bg ? "white" : color,
+      fontWeight: 700, fontSize: 11, cursor: disabled ? "default" : "pointer",
+      fontFamily: "'Outfit',sans-serif", opacity: disabled ? 0.5 : 1,
+      width: full ? "100%" : "auto", textAlign: "center",
+      animation: pulse ? "pu 2s infinite" : "none",
+    }}>{children}</button>
+  );
+}
+
+function Celebration({ kidName, reward, goal, onClose }) {
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20 }}>
+      <div style={{ background: "white", borderRadius: 24, padding: 28, maxWidth: 340, width: "100%", textAlign: "center", animation: "si .4s ease both" }}>
+        <div style={{ fontSize: 56, marginBottom: 8 }}>🎉</div>
+        <div style={{ fontSize: 32, marginBottom: 4 }}>🌟⭐🌟</div>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 24, marginBottom: 8 }}>Geschafft! 🥳</h2>
+        <p style={{ fontSize: 14, color: T.txt, marginBottom: 4 }}>{kidName} hat den Meilenstein erreicht!</p>
+        <div style={{ padding: "12px 16px", background: T.gL, borderRadius: 14, margin: "14px 0", fontSize: 18, fontWeight: 700, color: T.gld }}>
+          🎯 {reward}
+        </div>
+        <p style={{ fontSize: 12, color: T.mut, marginBottom: 16 }}>Alle {goal} Sterne gesammelt – mega! 🎊</p>
+        <button onClick={onClose} style={{ width: "100%", padding: "12px", borderRadius: 12, border: "none", background: "linear-gradient(135deg," + T.gld + "," + T.pri + ")", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>
+          Weiter feiern! 🎈
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function FamCelebration({ reward, onClose }) {
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20 }}>
+      <div style={{ background: "white", borderRadius: 24, padding: 28, maxWidth: 340, width: "100%", textAlign: "center", animation: "si .4s ease both" }}>
+        <div style={{ fontSize: 56, marginBottom: 8 }}>🎊</div>
+        <div style={{ fontSize: 32, marginBottom: 4 }}>👨‍👩‍👧</div>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 24, marginBottom: 8 }}>Familien-Meilenstein! 🏆</h2>
+        <p style={{ fontSize: 14, color: T.txt, marginBottom: 4 }}>Ihr habt es als Familie geschafft!</p>
+        <div style={{ padding: "12px 16px", background: T.aL, borderRadius: 14, margin: "14px 0", fontSize: 18, fontWeight: 700, color: T.acc }}>
+          🎯 {reward}
+        </div>
+        <button onClick={onClose} style={{ width: "100%", padding: "12px", borderRadius: 12, border: "none", background: "linear-gradient(135deg," + T.acc + "," + T.sec + ")", color: "white", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>
+          Super gemacht! 🎉
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function _Main({ onBack }) {
+  const [tasks, setTasks] = useState([
+    { id: 1, title: "Bad putzen", who: "kind", freq: "Wöchentlich", done: false, ok: false, due: "2 Tage", remind: true, days: ["Sa"], time: "" },
+    { id: 2, title: "Müll rausbringen", who: "kind", freq: "2x Woche", done: true, ok: true, due: "erledigt", days: [], time: "" },
+    { id: 3, title: "Spülmaschine", who: "", freq: "Täglich", done: false, ok: false, due: "Heute", days: [], time: "Abends" },
+    { id: 4, title: "Wäsche aufhängen", who: "mama", freq: "Nach Bedarf", done: false, ok: false, due: "Heute", days: [], time: "" },
+    { id: 5, title: "Zimmer aufräumen", who: "kind", freq: "Wöchentlich", done: true, ok: false, due: "Prüfen", days: ["Mo"], time: "Abends" },
+    { id: 6, title: "Fenster putzen", who: "papa", freq: "2-wöchentlich", done: false, ok: false, due: "Sa", days: ["Sa"], time: "Morgens" },
+    { id: 7, title: "Keller aufräumen", who: "", freq: "Halbjährlich", done: false, ok: false, due: "Offen", days: [], time: "" },
+  ]);
+
+  const [stars, setStars] = useState(12);
+  const [famP, setFamP] = useState(37);
+  const [sub, setSub] = useState("tasks");
+  const [showNew, setShowNew] = useState(false);
+  const [nt, setNt] = useState({ title: "", who: "", freq: "", days: [], time: "" });
+  const [showCeleb, setShowCeleb] = useState(false);
+  const [showFamCeleb, setShowFamCeleb] = useState(false);
+
+  const [kidGoal, setKidGoal] = useState(15);
+  const [famGoal, setFamGoal] = useState(50);
+  const [kidReward, setKidReward] = useState("Schwimmbad 🏊");
+  const [famReward, setFamReward] = useState("Kletterpark 🧗");
+  const [kidReached, setKidReached] = useState(false);
+  const [famReached, setFamReached] = useState(false);
+  const [pickKidGoal, setPickKidGoal] = useState(false);
+  const [pickFamGoal, setPickFamGoal] = useState(false);
+  const [editKidG, setEditKidG] = useState(false);
+  const [editFamG, setEditFamG] = useState(false);
+
+  const [kidW, setKidW] = useState([
+    { id: 1, text: "Neues Buch 📚", by: "kind" },
+    { id: 2, text: "Schwimmbad 🏊", by: "kind" },
+    { id: 3, text: "Länger aufbleiben 🌙", by: "mama" },
+  ]);
+  const [famW, setFamW] = useState([
+    { id: 1, text: "Kletterpark 🧗", by: "papa" },
+    { id: 2, text: "Pizza & Film 🍕", by: "kind" },
+    { id: 3, text: "Minigolf 🏌️", by: "mama" },
+  ]);
+  const [hist, setHist] = useState([
+    { text: "Filmabend – Luca wählte", date: "KW 5", icon: "🎬" },
+    { text: "Familien-Bowling", date: "KW 3", icon: "🎳" },
+  ]);
+  const [nkw, setNkw] = useState("");
+  const [nfw, setNfw] = useState("");
+
+  const mD = (id) => {
+    const task = tasks.find((t) => t.id === id);
+    const member = task.who ? gm(task.who) : null;
+    if (!member || member.role === "parent") {
+      setTasks(tasks.map((t) => t.id === id ? { ...t, done: true, ok: true, due: "erledigt" } : t));
+      const newFamP = famP + 1;
+      setFamP(newFamP);
+      if (newFamP === famGoal) { setShowFamCeleb(true); setFamReached(true); }
+    } else {
+      setTasks(tasks.map((t) => t.id === id ? { ...t, done: true, due: "Prüfen" } : t));
+    }
+  };
+
+  const mO = (id) => {
+    setTasks(tasks.map((t) => t.id === id ? { ...t, ok: true, due: "erledigt" } : t));
+    const newStars = stars + 1;
+    const newFamP = famP + 1;
+    setStars(newStars);
+    setFamP(newFamP);
+    if (newStars === kidGoal) { setShowCeleb(true); setKidReached(true); }
+    if (newFamP === famGoal) { setShowFamCeleb(true); setFamReached(true); }
+  };
+
+  const redeemKid = () => {
+    setHist([{ text: kidReward + " – " + gm("kind").name, date: "Heute", icon: "🏆" }, ...hist]);
+    setStars(stars - kidGoal);
+    setKidReached(false);
+    setPickKidGoal(true);
+  };
+
+  const selectKidGoal = (text) => {
+    setKidReward(text);
+    setPickKidGoal(false);
+    if (stars - kidGoal >= kidGoal) setKidReached(true);
+  };
+
+  const redeemFam = () => {
+    setHist([{ text: famReward + " – Familie", date: "Heute", icon: "🎊" }, ...hist]);
+    setFamP(famP - famGoal);
+    setFamReached(false);
+    setPickFamGoal(true);
+  };
+
+  const selectFamGoal = (text) => {
+    setFamReward(text);
+    setPickFamGoal(false);
+    if (famP - famGoal >= famGoal) setFamReached(true);
+  };
+
+  const addT = () => {
+    if (!nt.title.trim()) return;
+    const dayLabel = nt.days.length > 0 ? nt.days.join(", ") : "";
+    const timeLabel = nt.time || "";
+    const dueText = dayLabel && timeLabel ? dayLabel + " " + timeLabel : dayLabel || timeLabel || "Offen";
+    setTasks([...tasks, { id: Date.now(), title: nt.title.trim(), who: nt.who, freq: nt.freq || "Einmalig", done: false, ok: false, due: dueText, days: nt.days, time: nt.time }]);
+    setNt({ title: "", who: "", freq: "", days: [], time: "" });
+    setShowNew(false);
+  };
+
+  const toggleDay = (d) => {
+    const cur = nt.days || [];
+    setNt({ ...nt, days: cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d] });
+  };
+
+  const addKW = () => { if (!nkw.trim()) return; setKidW([...kidW, { id: Date.now(), text: nkw.trim(), by: "kind" }]); setNkw(""); };
+  const addFW = () => { if (!nfw.trim()) return; setFamW([...famW, { id: Date.now(), text: nfw.trim(), by: "mama" }]); setNfw(""); };
+
+  const pend = tasks.filter((t) => !t.done || !t.ok);
+  const comp = tasks.filter((t) => t.done && t.ok);
+
+  // ── Rewards View ──
+  if (sub === "rewards") return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',sans-serif;background:#F7F3EE;color:#3D405B}input::placeholder{color:#9993A6;opacity:.55}@keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}`}</style>
+      <div style={{ padding: "16px 16px 10px", background: "linear-gradient(180deg,white,#F7F3EE)", position: "sticky", top: 0, zIndex: 50 }}>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 24, background: "linear-gradient(135deg,#C25D45,#3D405B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FamiliApp</h1>
+        <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>Aufgaben & Belohnungen</p>
+      </div>
+      <div style={{ padding: "0 16px 40px" }}>
+        <button onClick={() => setSub("tasks")} style={{ background: "none", border: "none", color: T.pri, fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 10, padding: 0 }}>← Zurück</button>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 21, marginBottom: 12 }}>🎁 Belohnungen</h2>
+
+        {pickKidGoal ? (
+          <div style={{ background: "linear-gradient(135deg," + T.gL + "," + T.card + ")", borderRadius: 14, padding: 16, border: "1px solid " + T.bor, marginBottom: 12 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: T.gld, textTransform: "uppercase", marginBottom: 4 }}>⭐ Nächstes Ziel wählen</p>
+            <p style={{ fontSize: 12, color: T.mut, marginBottom: 10 }}>Worauf spart {gm("kind").name} als nächstes?</p>
+            {kidW.map((w) => (
+              <div key={w.id} onClick={() => selectKidGoal(w.text)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "11px 14px", background: "white", borderRadius: 10, marginBottom: 6, border: "1.5px solid " + T.bor, cursor: "pointer", borderLeft: "3px solid " + T.gld }}>
+                <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{w.text}</span>
+                <span style={{ fontSize: 11, color: T.mut }}>{gm(w.by).emoji}</span>
+                <span style={{ fontSize: 12, color: T.gld }}>→</span>
+              </div>
+            ))}
+          </div>
+        ) : kidReached ? (
+          <div style={{ background: "linear-gradient(135deg," + T.gL + "," + T.card + ")", borderRadius: 14, padding: 16, border: "1px solid " + T.bor, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 24 }}>🏆</span>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 700, color: T.gld, textTransform: "uppercase" }}>Erreicht!</p>
+                <p style={{ fontSize: 16, fontWeight: 800, color: T.gld }}>{kidReward}</p>
+              </div>
+            </div>
+            <p style={{ fontSize: 12, color: T.mut, marginBottom: 4 }}>{gm("kind").name} hat {kidGoal} Sterne gesammelt!</p>
+            {stars > kidGoal && <p style={{ fontSize: 12, fontWeight: 700, color: T.gld, marginBottom: 8 }}>+{stars - kidGoal} ⭐ bereits fürs nächste Ziel gesammelt</p>}
+            <button onClick={redeemKid} style={{ width: "100%", padding: "10px", borderRadius: 10, border: "none", background: T.gld, color: "white", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>✓ Eingelöst – nächstes Ziel wählen</button>
+          </div>
+        ) : (
+          <div style={{ background: "linear-gradient(135deg," + T.gL + "," + T.card + ")", borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1 }}>⭐ {gm("kind").name}s Meilenstein</p>
+              <button onClick={() => setEditKidG(!editKidG)} style={{ background: "none", border: "none", fontSize: 14, cursor: "pointer", opacity: 0.6 }}>⚙️</button>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 5 }}>
+              <span style={{ fontSize: 26, fontWeight: 800, color: T.gld }}>{stars}</span>
+              <span style={{ fontSize: 12, color: T.mut }}>/ {kidGoal}</span>
+            </div>
+            <div style={{ width: "100%", height: 7, background: T.bor, borderRadius: 7, overflow: "hidden" }}>
+              <div style={{ width: Math.min(stars / kidGoal * 100, 100) + "%", height: "100%", background: T.gld, borderRadius: 7 }} />
+            </div>
+            <p style={{ fontSize: 12, marginTop: 7, fontWeight: 600 }}>🎯 {kidReward}</p>
+            {editKidG && (
+              <div style={{ marginTop: 10, padding: "10px 12px", background: "white", borderRadius: 10, border: "1.5px solid " + T.bor }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: T.gld, textTransform: "uppercase", marginBottom: 6 }}>⭐ Sterne bis zum Meilenstein</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
+                  <button onClick={() => setKidGoal(Math.max(5, kidGoal - 5))} style={{ width: 36, height: 36, borderRadius: 10, border: "1.5px solid " + T.bor, background: T.bg, fontSize: 18, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>−</button>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: T.gld, minWidth: 50, textAlign: "center" }}>{kidGoal}</span>
+                  <button onClick={() => setKidGoal(kidGoal + 5)} style={{ width: 36, height: 36, borderRadius: 10, border: "1.5px solid " + T.bor, background: T.bg, fontSize: 18, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+</button>
+                </div>
+                <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 6, flexWrap: "wrap", alignItems: "center" }}>
+                  {[5, 10, 15, 20, 30].map(v => (
+                    <button key={v} onClick={() => setKidGoal(v)} style={{ padding: "4px 8px", borderRadius: 8, border: kidGoal === v ? "2px solid " + T.gld : "1.5px solid " + T.bor, background: kidGoal === v ? T.gL : "white", fontSize: 11, fontWeight: 700, color: kidGoal === v ? T.gld : T.mut, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>{v}</button>
+                  ))}
+                  <input type="number" min={1} value={kidGoal} onChange={e => { const v = parseInt(e.target.value); if (v > 0) setKidGoal(v); }} style={{ width: 48, padding: "4px 4px", borderRadius: 8, border: "1.5px solid " + T.gld, fontSize: 12, fontWeight: 700, color: T.gld, textAlign: "center", fontFamily: "'Outfit',sans-serif", outline: "none" }} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7, marginTop: 16 }}>💫 {gm("kind").name}s Wunschliste</p>
+        {kidW.map((w) => (
+          <div key={w.id} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", background: T.card, borderRadius: 10, marginBottom: 5, border: "1px solid " + T.bor, borderLeft: "3px solid " + gm(w.by).color }}>
+            <span style={{ flex: 1, fontSize: 13 }}>{w.text}</span>
+            <span style={{ fontSize: 11 }}>{gm(w.by).emoji}</span>
+          </div>
+        ))}
+        <div style={{ display: "flex", gap: 5, marginTop: 5 }}>
+          <input value={nkw} onChange={(e) => setNkw(e.target.value)} placeholder="Neuer Wunsch..." onKeyDown={(e) => e.key === "Enter" && addKW()} style={{ ...ist, flex: 1, fontSize: 12 }} />
+          <Btn onClick={addKW} bg={T.gld}>+</Btn>
+        </div>
+
+        {pickFamGoal ? (
+          <div style={{ background: "linear-gradient(135deg," + T.aL + "," + T.card + ")", borderRadius: 14, padding: 16, border: "1px solid " + T.bor, marginTop: 18, marginBottom: 12 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: T.acc, textTransform: "uppercase", marginBottom: 4 }}>🎪 Nächstes Familienziel wählen</p>
+            <p style={{ fontSize: 12, color: T.mut, marginBottom: 10 }}>Was macht ihr als nächstes zusammen?</p>
+            {famW.map((w) => (
+              <div key={w.id} onClick={() => selectFamGoal(w.text)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "11px 14px", background: "white", borderRadius: 10, marginBottom: 6, border: "1.5px solid " + T.bor, cursor: "pointer", borderLeft: "3px solid " + T.acc }}>
+                <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{w.text}</span>
+                <span style={{ fontSize: 11, color: T.mut }}>{gm(w.by).emoji}</span>
+                <span style={{ fontSize: 12, color: T.acc }}>→</span>
+              </div>
+            ))}
+          </div>
+        ) : famReached ? (
+          <div style={{ background: "linear-gradient(135deg," + T.aL + "," + T.card + ")", borderRadius: 14, padding: 16, border: "1px solid " + T.bor, marginTop: 18, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 24 }}>🏆</span>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 700, color: T.acc, textTransform: "uppercase" }}>Familien-Ziel erreicht!</p>
+                <p style={{ fontSize: 16, fontWeight: 800, color: T.acc }}>{famReward}</p>
+              </div>
+            </div>
+            <button onClick={redeemFam} style={{ width: "100%", padding: "10px", borderRadius: 10, border: "none", background: T.acc, color: "white", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>✓ Eingelöst – nächstes Ziel wählen</button>
+          </div>
+        ) : (
+          <div style={{ background: "linear-gradient(135deg," + T.aL + "," + T.card + ")", borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginTop: 18, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1 }}>👨‍👩‍👧 Familien-Meilenstein</p>
+              <button onClick={() => setEditFamG(!editFamG)} style={{ background: "none", border: "none", fontSize: 14, cursor: "pointer", opacity: 0.6 }}>⚙️</button>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 5 }}>
+              <span style={{ fontSize: 26, fontWeight: 800, color: T.acc }}>{famP}</span>
+              <span style={{ fontSize: 12, color: T.mut }}>/ {famGoal}</span>
+            </div>
+            <div style={{ width: "100%", height: 7, background: T.bor, borderRadius: 7, overflow: "hidden" }}>
+              <div style={{ width: Math.min(famP / famGoal * 100, 100) + "%", height: "100%", background: T.acc, borderRadius: 7 }} />
+            </div>
+            <p style={{ fontSize: 12, marginTop: 7, fontWeight: 600 }}>🎯 {famReward}</p>
+            {editFamG && (
+              <div style={{ marginTop: 10, padding: "10px 12px", background: "white", borderRadius: 10, border: "1.5px solid " + T.bor }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: T.acc, textTransform: "uppercase", marginBottom: 6 }}>📊 Punkte bis zum Familienziel</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
+                  <button onClick={() => setFamGoal(Math.max(10, famGoal - 10))} style={{ width: 36, height: 36, borderRadius: 10, border: "1.5px solid " + T.bor, background: T.bg, fontSize: 18, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>−</button>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: T.acc, minWidth: 50, textAlign: "center" }}>{famGoal}</span>
+                  <button onClick={() => setFamGoal(famGoal + 10)} style={{ width: 36, height: 36, borderRadius: 10, border: "1.5px solid " + T.bor, background: T.bg, fontSize: 18, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>+</button>
+                </div>
+                <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 6, flexWrap: "wrap", alignItems: "center" }}>
+                  {[20, 30, 50, 75, 100].map(v => (
+                    <button key={v} onClick={() => setFamGoal(v)} style={{ padding: "4px 8px", borderRadius: 8, border: famGoal === v ? "2px solid " + T.acc : "1.5px solid " + T.bor, background: famGoal === v ? T.aL : "white", fontSize: 11, fontWeight: 700, color: famGoal === v ? T.acc : T.mut, cursor: "pointer", fontFamily: "'Outfit',sans-serif" }}>{v}</button>
+                  ))}
+                  <input type="number" min={1} value={famGoal} onChange={e => { const v = parseInt(e.target.value); if (v > 0) setFamGoal(v); }} style={{ width: 48, padding: "4px 4px", borderRadius: 8, border: "1.5px solid " + T.acc, fontSize: 12, fontWeight: 700, color: T.acc, textAlign: "center", fontFamily: "'Outfit',sans-serif", outline: "none" }} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7, marginTop: 16 }}>🎪 Familien-Wunschliste</p>
+        {famW.map((w) => (
+          <div key={w.id} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", background: T.card, borderRadius: 10, marginBottom: 5, border: "1px solid " + T.bor, borderLeft: "3px solid " + gm(w.by).color }}>
+            <span style={{ flex: 1, fontSize: 13 }}>{w.text}</span>
+            <span style={{ fontSize: 11 }}>{gm(w.by).emoji}</span>
+          </div>
+        ))}
+        <div style={{ display: "flex", gap: 5, marginTop: 5 }}>
+          <input value={nfw} onChange={(e) => setNfw(e.target.value)} placeholder="Familienwunsch..." onKeyDown={(e) => e.key === "Enter" && addFW()} style={{ ...ist, flex: 1, fontSize: 12 }} />
+          <Btn onClick={addFW} bg={T.acc}>+</Btn>
+        </div>
+
+        <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1, marginBottom: 7, marginTop: 16 }}>🏆 Erreicht</p>
+        {hist.map((h, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", background: T.bg, borderRadius: 10, marginBottom: 5, opacity: 0.7 }}>
+            <span style={{ fontSize: 18 }}>{h.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600 }}>{h.text}</div>
+              <div style={{ fontSize: 10.5, color: T.mut }}>{h.date}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── Tasks Main View ──
+  return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',sans-serif;background:#F7F3EE;color:#3D405B}input::placeholder{color:#9993A6;opacity:.55}select{font-family:'Outfit',sans-serif}@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}`}</style>
+
+      {showCeleb && <Celebration kidName={gm("kind").name} reward={kidReward} goal={kidGoal} onClose={() => setShowCeleb(false)} />}
+      {showFamCeleb && <FamCelebration reward={famReward} onClose={() => setShowFamCeleb(false)} />}
+
+      <div style={{ padding: "16px 16px 10px", background: "linear-gradient(180deg,white,#F7F3EE)", position: "sticky", top: 0, zIndex: 50 }}>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 24, background: "linear-gradient(135deg,#C25D45,#3D405B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FamiliApp</h1>
+        <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>Aufgaben & Belohnungen</p>
+      </div>
+
+      <div style={{ padding: "0 16px 100px" }}>
+        <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 21, marginBottom: 3 }}>🏠 Aufgaben</h2>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 14, marginTop: 10 }}>
+          <div onClick={() => setSub("rewards")} style={{ flex: 1, background: "linear-gradient(160deg," + T.gL + "," + T.card + ")", borderRadius: 14, padding: 12, border: "1px solid " + T.bor, cursor: "pointer" }}>
+            {kidReached ? (
+              <div><p style={{ fontSize: 10, fontWeight: 700, color: T.gld, textTransform: "uppercase", marginBottom: 4 }}>🏆 Erreicht!</p><p style={{ fontSize: 14, fontWeight: 800, color: T.gld }}>{kidReward}</p>{stars > kidGoal && <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>+{stars - kidGoal} ⭐ für nächstes Ziel</p>}</div>
+            ) : (
+              <div><p style={{ fontSize: 10, fontWeight: 700, color: T.mut, textTransform: "uppercase", marginBottom: 4 }}>⭐ {gm("kind").name}</p><span style={{ fontSize: 22, fontWeight: 800, color: T.gld }}>{stars}</span><span style={{ fontSize: 11, color: T.mut }}> / {kidGoal}</span><div style={{ width: "100%", height: 5, background: T.bor, borderRadius: 5, overflow: "hidden", marginTop: 4 }}><div style={{ width: Math.min(stars / kidGoal * 100, 100) + "%", height: "100%", background: T.gld, borderRadius: 5 }} /></div></div>
+            )}
+          </div>
+          <div onClick={() => setSub("rewards")} style={{ flex: 1, background: "linear-gradient(160deg," + T.aL + "," + T.card + ")", borderRadius: 14, padding: 12, border: "1px solid " + T.bor, cursor: "pointer" }}>
+            {famReached ? (
+              <div><p style={{ fontSize: 10, fontWeight: 700, color: T.acc, textTransform: "uppercase", marginBottom: 4 }}>🏆 Erreicht!</p><p style={{ fontSize: 14, fontWeight: 800, color: T.acc }}>{famReward}</p>{famP > famGoal && <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>+{famP - famGoal} für nächstes Ziel</p>}</div>
+            ) : (
+              <div><p style={{ fontSize: 10, fontWeight: 700, color: T.mut, textTransform: "uppercase", marginBottom: 4 }}>👨‍👩‍👧 Familie</p><span style={{ fontSize: 22, fontWeight: 800, color: T.acc }}>{famP}</span><span style={{ fontSize: 11, color: T.mut }}> / {famGoal}</span><div style={{ width: "100%", height: 5, background: T.bor, borderRadius: 5, overflow: "hidden", marginTop: 4 }}><div style={{ width: Math.min(famP / famGoal * 100, 100) + "%", height: "100%", background: T.acc, borderRadius: 5 }} /></div></div>
+            )}
+          </div>
+        </div>
+
+        <Btn onClick={() => setSub("rewards")} color={T.gld} full>🎁 Belohnungen & Wunschlisten</Btn>
+
+        {showNew && (
+          <div style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginTop: 14, marginBottom: 14, borderLeft: "4px solid " + T.pri }}>
+            <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>📋 Neue Aufgabe</p>
+            <input value={nt.title} onChange={(e) => setNt({ ...nt, title: e.target.value })} placeholder="Was muss getan werden?" autoFocus style={ist} />
+
+            <p style={{ fontSize: 11, fontWeight: 700, color: T.mut, marginBottom: 4, marginTop: 4 }}>Wer? (optional)</p>
+            <div style={{ display: "flex", gap: 5, marginBottom: 8 }}>
+              <button onClick={() => setNt({ ...nt, who: "" })} style={{ flex: 1, padding: 6, borderRadius: 8, border: nt.who === "" ? "2px solid " + T.sec : "1.5px solid " + T.bor, background: nt.who === "" ? T.sec + "12" : "white", cursor: "pointer", textAlign: "center" }}>
+                <span style={{ fontSize: 16 }}>👥</span>
+                <div style={{ fontSize: 9, fontWeight: 700, color: nt.who === "" ? T.sec : T.mut }}>Offen</div>
+              </button>
+              {FAM.map((m) => (
+                <button key={m.id} onClick={() => setNt({ ...nt, who: m.id })} style={{ flex: 1, padding: 6, borderRadius: 8, border: nt.who === m.id ? "2px solid " + m.color : "1.5px solid " + T.bor, background: nt.who === m.id ? m.color + "12" : "white", cursor: "pointer", textAlign: "center" }}>
+                  <span style={{ fontSize: 16 }}>{m.emoji}</span>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: nt.who === m.id ? m.color : T.mut }}>{m.name}</div>
+                </button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 11, fontWeight: 700, color: T.mut, marginBottom: 4 }}>Wie oft?</p>
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
+              {FREQS.map((f) => (
+                <button key={f} onClick={() => setNt({ ...nt, freq: f })} style={{ padding: "5px 10px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", border: nt.freq === f ? "2px solid " + T.pri : "1.5px solid " + T.bor, background: nt.freq === f ? T.pL : "white", color: nt.freq === f ? T.pri : T.mut }}>{f}</button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 11, fontWeight: 700, color: T.mut, marginBottom: 4 }}>Welche Tage?</p>
+            <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+              {DAYS.map((d) => (
+                <button key={d} onClick={() => toggleDay(d)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", border: (nt.days || []).includes(d) ? "2px solid " + T.pri : "1.5px solid " + T.bor, background: (nt.days || []).includes(d) ? T.pL : "white", color: (nt.days || []).includes(d) ? T.pri : T.mut, textAlign: "center" }}>{d}</button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 11, fontWeight: 700, color: T.mut, marginBottom: 4 }}>Welche Tageszeit?</p>
+            <div style={{ display: "flex", gap: 5, marginBottom: 10 }}>
+              {TIMES.map((t) => (
+                <button key={t} onClick={() => setNt({ ...nt, time: nt.time === t ? "" : t })} style={{ flex: 1, padding: "7px 0", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit',sans-serif", border: nt.time === t ? "2px solid " + T.acc : "1.5px solid " + T.bor, background: nt.time === t ? T.aL : "white", color: nt.time === t ? T.acc : T.mut, textAlign: "center" }}>{t === "Morgens" ? "☀️" : t === "Nachmittags" ? "🌤️" : "🌙"} {t}</button>
+              ))}
+            </div>
+
+            {nt.title && (
+              <div style={{ padding: "8px 12px", background: T.bg, borderRadius: 10, marginBottom: 10, fontSize: 12 }}>
+                <b>Vorschau: </b>
+                {nt.who ? gm(nt.who).emoji : "👥"} {nt.title} · {nt.freq || "Einmalig"}
+                {(nt.days || []).length > 0 && " · " + nt.days.join(", ")}
+                {nt.time && " " + nt.time}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 6 }}>
+              <Btn onClick={() => { setShowNew(false); setNt({ title: "", who: "", freq: "", days: [], time: "" }); }} color={T.mut} full>Abbrechen</Btn>
+              <Btn onClick={addT} bg={T.pri} full disabled={!nt.title.trim()}>Anlegen</Btn>
+            </div>
+          </div>
+        )}
+
+        {pend.map((t, i) => {
+          const m = t.who ? gm(t.who) : null;
+          const isChild = m && m.role === "child";
+          const needsOk = t.done && !t.ok && isChild;
+          const hasSchedule = (t.days && t.days.length > 0) || t.time;
+          return (
+            <div key={t.id} style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginBottom: 8, borderLeft: "3.5px solid " + (t.done ? T.acc : t.due === "Heute" ? T.pri : T.bor) }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                    <span style={{ fontSize: 16 }}>{m ? m.emoji : "👥"}</span>
+                    <span style={{ fontWeight: 700, fontSize: 14 }}>{t.title}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                    <span style={{ display: "inline-block", padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: T.mut, background: T.bg }}>{t.freq}</span>
+                    <span style={{ display: "inline-block", padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: t.due === "Heute" ? T.pri : t.done ? T.acc : T.mut, background: t.due === "Heute" ? T.pL : t.done ? T.aL : T.bg }}>{t.due}</span>
+                    {!m && !t.done && <span style={{ display: "inline-block", padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: T.sec, background: T.sec + "12" }}>👥 Offen</span>}
+                    {hasSchedule && !t.done && (
+                      <span style={{ display: "inline-block", padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: T.sec, background: T.sec + "10" }}>
+                        📅 {(t.days || []).join(", ")}{t.time ? " " + t.time : ""}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {!t.done && <Btn onClick={() => mD(t.id)} color={T.acc}>Erledigt ✓</Btn>}
+                {needsOk && <Btn onClick={() => mO(t.id)} bg={T.gld} pulse>⭐ Bestätigen</Btn>}
+              </div>
+              {t.remind && !t.done && (
+                <div style={{ marginTop: 8, padding: "7px 11px", background: T.pL, borderRadius: 8, fontSize: 11.5, color: T.pri, fontWeight: 600 }}>
+                  💬 Hey {gm("kind").name}! Bad wartet – noch {t.due} 😊
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {comp.length > 0 && (
+          <div>
+            <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 7, marginTop: 16 }}>✓ Erledigt</p>
+            {comp.map((t) => (
+              <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 12px", background: T.bg, borderRadius: 9, marginBottom: 4, opacity: 0.5 }}>
+                <span>{t.who ? gm(t.who).emoji : "👥"}</span>
+                <span style={{ textDecoration: "line-through", fontSize: 12.5 }}>{t.title}</span>
+                <span style={{ marginLeft: "auto" }}>⭐</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button onClick={() => setShowNew(true)} style={{ position: "fixed", bottom: 24, right: "max(16px,calc(50% - 196px))", width: 48, height: 48, borderRadius: 14, border: "none", background: "linear-gradient(135deg,#C25D45,#C25D45cc)", color: "white", boxShadow: "0 4px 14px #C25D4544", cursor: "pointer", fontSize: 22, fontWeight: 700, zIndex: 90 }}>+</button>
+    </div>
+  );
+}
+
+  return function(props) {
+    return React.createElement("div", null,
+      React.createElement("div", {
+        onClick: props.onBack,
+        style: { position:"fixed", top:0, left:0, right:0, zIndex:999, maxWidth:420, margin:"0 auto",
+          background:"linear-gradient(180deg,#F7F3EE,rgba(247,243,238,.9))", 
+          padding:"8px 16px 4px", display:"flex", alignItems:"center", gap:8, cursor:"pointer" }
+      },
+        React.createElement("span", { style:{ fontSize:18 } }, "←"),
+        React.createElement("span", { style:{ fontSize:12, fontWeight:700, color:"#9993A6", fontFamily:"'Outfit',sans-serif" } }, "Home")
+      ),
+      React.createElement("div", { style:{ paddingTop:32 } },
+        React.createElement(_Main, props)
+      )
+    );
+  };
+})();
+
+// ── B2: Projekte ────────────────────────────────
+const ProjekteApp = (() => {
+  const { useState } = React;
+
+const FAM = [
+  { id: "mama", name: "Mama", emoji: "👩", color: "#C25D45" },
+  { id: "papa", name: "Papa", emoji: "👨", color: "#4A5899" },
+  { id: "kind", name: "Luca", emoji: "🧒", color: "#52966E" },
+];
+
+const SCATS = [
+  { id: "super", label: "🛒 Supermarkt", color: "#52966E" },
+  { id: "bau", label: "🔨 Baumarkt", color: "#D48A3C" },
+  { id: "online", label: "📦 Online", color: "#4A5899" },
+  { id: "moebel", label: "🛋️ Möbelhaus", color: "#8B5DAA" },
+];
+
+const PCOLS = ["#52966E", "#C25D45", "#B07CC6", "#D48A3C", "#4A5899"];
+const PEMOJIS = ["📌", "🏠", "🌿", "🎨", "🏖️", "🚗", "🎓", "🛠️", "🎁", "🎵"];
+const gm = (id) => FAM.find((m) => m.id === id) || FAM[0];
+
+const T = {
+  bg: "#F7F3EE", card: "#fff", pri: "#C25D45", pL: "#F5DCD5",
+  sec: "#3D405B", acc: "#52966E", aL: "#D5EADD", gld: "#D9A632",
+  gL: "#FDF4D8", txt: "#3D405B", mut: "#9993A6", bor: "#EAE3D9",
+  sh: "0 1px 10px rgba(61,64,91,.05)",
+};
+
+const ist = { width: "100%", padding: "9px 12px", borderRadius: 10, border: "1.5px solid #EAE3D9", fontSize: 13, fontFamily: "'Outfit',sans-serif", outline: "none", marginBottom: 6 };
+
+function Btn({ children, onClick, color, bg, full }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: "5px 10px", borderRadius: 10, border: "none",
+      background: bg || (color + "18"), color: bg ? "white" : color,
+      fontWeight: 700, fontSize: 11, cursor: "pointer",
+      fontFamily: "'Outfit',sans-serif",
+      width: full ? "100%" : "auto", textAlign: "center",
+    }}>{children}</button>
+  );
+}
+
+function NotePanel({ notes, input, setInput, onAdd }) {
+  return (
+    <div style={{ padding: "10px 13px", background: "#3D405B08", borderRadius: "0 0 12px 12px", marginBottom: 7, borderTop: "1px dashed #EAE3D9" }}>
+      {notes.length === 0 && <p style={{ fontSize: 11.5, color: T.mut, fontStyle: "italic", marginBottom: 6 }}>Noch keine Notizen</p>}
+      {notes.map((n, i) => {
+        const m = gm(n.by);
+        const isLink = n.text.startsWith("http");
+        return (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 7 }}>
+            <div style={{ width: 3, borderRadius: 3, background: m.color, flexShrink: 0 }} />
+            <div>
+              <span style={{ fontSize: 10, fontWeight: 700, color: m.color }}>{m.emoji} {m.name}</span>
+              {isLink
+                ? <div style={{ fontSize: 12, color: T.pri, marginTop: 1, wordBreak: "break-all" }}>🔗 {n.text}</div>
+                : <p style={{ fontSize: 12.5, lineHeight: 1.4, marginTop: 1 }}>{n.text}</p>
+              }
+            </div>
+          </div>
+        );
+      })}
+      <div style={{ display: "flex", gap: 5, marginTop: 6 }}>
+        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Notiz oder Link..."
+          onKeyDown={(e) => e.key === "Enter" && onAdd()}
+          style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1.5px solid #EAE3D9", fontSize: 12, fontFamily: "'Outfit',sans-serif", outline: "none" }} />
+        <Btn onClick={onAdd} bg={T.sec}>📝</Btn>
+      </div>
+    </div>
+  );
+}
+
+function Detail({ proj, onBack, projects, setProjects }) {
+  const [ps, setPs] = useState("board");
+  const [openN, setOpenN] = useState(null);
+  const [ni, setNi] = useState("");
+  const [sAI, setSAI] = useState(false);
+  const [nI, setNI] = useState("");
+  const [sAT, setSAT] = useState(false);
+  const [nT, setNT] = useState("");
+  const [nTW, setNTW] = useState("");
+  const [sAS, setSAS] = useState(false);
+  const [nS, setNS] = useState("");
+  const [nSC, setNSC] = useState("");
+  const [nSN, setNSN] = useState("");
+  const [editS, setEditS] = useState(null);
+  const [eText, setEText] = useState("");
+  const [eCat, setECat] = useState("");
+  const [eNote, setENote] = useState("");
+
+  const ideas = proj.items.filter((i) => i.type === "idea");
+  const todos = proj.items.filter((i) => i.type === "todo");
+  const dc = todos.filter((t) => t.done).length;
+  const sO = (proj.shopping || []).filter((s) => !s.done);
+  const sD = (proj.shopping || []).filter((s) => s.done);
+  const grp = SCATS.map((c) => ({ ...c, items: sO.filter((s) => s.cat === c.id) })).filter((g) => g.items.length > 0);
+
+  const up = (fn) => setProjects(projects.map((p) => (p.id === proj.id ? fn(p) : p)));
+
+  return (
+    <div style={{ padding: "0 16px 40px" }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", color: T.pri, fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Outfit',sans-serif", marginBottom: 10, padding: 0 }}>← Zurück</button>
+      <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 21, marginBottom: 10 }}>{proj.title}</h2>
+
+      <div style={{ display: "flex", marginBottom: 14, background: T.bor, borderRadius: 10, padding: 3 }}>
+        <button onClick={() => setPs("board")} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif", background: ps === "board" ? T.card : "transparent", color: ps === "board" ? T.txt : T.mut }}>📋 Board</button>
+        <button onClick={() => setPs("shop")} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: "'Outfit',sans-serif", background: ps === "shop" ? T.card : "transparent", color: ps === "shop" ? T.txt : T.mut }}>🛒 Einkauf</button>
+      </div>
+
+      {ps === "board" && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+            <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1 }}>💡 Ideen</p>
+            <Btn onClick={() => setSAI(!sAI)} color={T.gld}>+ Idee</Btn>
+          </div>
+          {sAI && (
+            <div style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginBottom: 8, borderLeft: "3px solid " + T.gld }}>
+              <input value={nI} onChange={(e) => setNI(e.target.value)} placeholder="Neue Idee..." autoFocus onKeyDown={(e) => { if (e.key === "Enter" && nI.trim()) { up((p) => ({ ...p, items: [...p.items, { id: Date.now(), text: nI.trim(), type: "idea", done: false, notes: [] }] })); setNI(""); setSAI(false); }}} style={ist} />
+              <div style={{ display: "flex", gap: 6 }}>
+                <Btn onClick={() => setSAI(false)} color={T.mut}>Abbrechen</Btn>
+                <Btn onClick={() => { if (nI.trim()) { up((p) => ({ ...p, items: [...p.items, { id: Date.now(), text: nI.trim(), type: "idea", done: false, notes: [] }] })); setNI(""); setSAI(false); }}} bg={T.gld}>Hinzufügen</Btn>
+              </div>
+            </div>
+          )}
+          {ideas.map((it) => {
+            const nK = "i" + it.id;
+            const isO = openN === nK;
+            return (
+              <div key={it.id} style={{ marginBottom: isO ? 0 : 7 }}>
+                <div style={{ background: T.card, borderRadius: isO ? "14px 14px 0 0" : 14, padding: 14, border: "1px solid " + T.bor, borderLeft: "3px solid " + T.gld, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 13, flex: 1 }}>{it.text}</span>
+                  <div style={{ display: "flex", gap: 5 }}>
+                    <Btn onClick={() => { setOpenN(isO ? null : nK); setNi(""); }} color={T.sec}>{"📝 " + (it.notes.length || "")}</Btn>
+                    <Btn onClick={() => up((p) => ({ ...p, items: p.items.map((x) => x.id === it.id ? { ...x, type: "todo", who: "" } : x) }))} color={T.acc}>→ Aufgabe</Btn>
+                  </div>
+                </div>
+                {isO && <NotePanel notes={it.notes} input={ni} setInput={setNi} onAdd={() => { if (ni.trim()) { up((p) => ({ ...p, items: p.items.map((x) => x.id === it.id ? { ...x, notes: [...x.notes, { by: "mama", text: ni.trim() }] } : x) })); setNi(""); }}} />}
+              </div>
+            );
+          })}
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, marginBottom: 4 }}>
+            <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1 }}>✅ Aufgaben</p>
+            <Btn onClick={() => setSAT(!sAT)} color={T.acc}>+ Aufgabe</Btn>
+          </div>
+          {sAT && (
+            <div style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginBottom: 8, borderLeft: "3px solid " + T.acc }}>
+              <input value={nT} onChange={(e) => setNT(e.target.value)} placeholder="Neue Aufgabe..." autoFocus style={ist} />
+              <p style={{ fontSize: 10, color: T.mut, marginBottom: 4 }}>Wer? (optional)</p>
+              <div style={{ display: "flex", gap: 5, marginBottom: 6 }}>
+                <button onClick={() => setNTW("")} style={{ flex: 1, padding: 6, borderRadius: 8, border: nTW === "" ? "2px solid " + T.sec : "1.5px solid " + T.bor, background: nTW === "" ? T.sec + "12" : "white", cursor: "pointer", textAlign: "center" }}>
+                  <span style={{ fontSize: 16 }}>👥</span>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: nTW === "" ? T.sec : T.mut }}>Offen</div>
+                </button>
+                {FAM.map((m) => (
+                  <button key={m.id} onClick={() => setNTW(m.id)} style={{ flex: 1, padding: 6, borderRadius: 8, border: nTW === m.id ? "2px solid " + m.color : "1.5px solid " + T.bor, background: nTW === m.id ? m.color + "12" : "white", cursor: "pointer", textAlign: "center" }}>
+                    <span style={{ fontSize: 16 }}>{m.emoji}</span>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: nTW === m.id ? m.color : T.mut }}>{m.name}</div>
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <Btn onClick={() => setSAT(false)} color={T.mut}>Abbrechen</Btn>
+                <Btn onClick={() => { if (nT.trim()) { up((p) => ({ ...p, items: [...p.items, { id: Date.now(), text: nT.trim(), type: "todo", done: false, who: nTW || "", notes: [] }] })); setNT(""); setNTW(""); setSAT(false); }}} bg={T.acc}>Hinzufügen</Btn>
+              </div>
+            </div>
+          )}
+          {todos.map((it) => {
+            const m = it.who ? gm(it.who) : null;
+            const nK = "t" + it.id;
+            const isO = openN === nK;
+            return (
+              <div key={it.id} style={{ marginBottom: isO ? 0 : 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 13px", background: T.card, borderRadius: isO ? "12px 12px 0 0" : 12, border: "1px solid " + T.bor, opacity: it.done ? 0.5 : 1 }}>
+                  <div onClick={() => up((p) => ({ ...p, items: p.items.map((x) => x.id === it.id ? { ...x, done: !x.done } : x) }))} style={{ width: 21, height: 21, borderRadius: 6, cursor: "pointer", border: it.done ? "none" : "2px solid " + T.bor, background: it.done ? T.acc : "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {it.done && <span style={{ color: "white", fontSize: 12 }}>✓</span>}
+                  </div>
+                  <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, textDecoration: it.done ? "line-through" : "none" }}>{it.text}</span>
+                  <Btn onClick={() => { setOpenN(isO ? null : nK); setNi(""); }} color={T.sec}>{"📝 " + (it.notes.length || "")}</Btn>
+                  {m ? <span style={{ fontSize: 13 }}>{m.emoji}</span> : <span onClick={(e) => { e.stopPropagation(); up((p) => ({ ...p, items: p.items.map((x) => x.id === it.id ? { ...x, who: "mama" } : x) })); }} style={{ fontSize: 10, fontWeight: 700, color: T.sec, background: T.sec + "12", padding: "2px 8px", borderRadius: 12, cursor: "pointer" }}>👥 Offen</span>}
+                </div>
+                {isO && <NotePanel notes={it.notes} input={ni} setInput={setNi} onAdd={() => { if (ni.trim()) { up((p) => ({ ...p, items: p.items.map((x) => x.id === it.id ? { ...x, notes: [...x.notes, { by: "mama", text: ni.trim() }] } : x) })); setNi(""); }}} />}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {ps === "shop" && (
+        <div>
+          <Btn onClick={() => setSAS(!sAS)} color={T.pri} full>+ Artikel hinzufügen</Btn>
+          {sAS && (
+            <div style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginTop: 8, marginBottom: 8, borderLeft: "3px solid " + T.pri }}>
+              <input value={nS} onChange={(e) => setNS(e.target.value)} placeholder="Was wird gebraucht?" autoFocus style={ist} />
+              <select value={nSC} onChange={(e) => setNSC(e.target.value)} style={{ ...ist, background: "white" }}>
+                <option value="">Wo kaufen?</option>
+                {SCATS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+              <input value={nSN} onChange={(e) => setNSN(e.target.value)} placeholder="Notiz / Link (optional)" style={ist} />
+              <div style={{ display: "flex", gap: 6 }}>
+                <Btn onClick={() => setSAS(false)} color={T.mut}>Abbrechen</Btn>
+                <Btn onClick={() => { if (nS.trim() && nSC) { up((p) => ({ ...p, shopping: [...p.shopping, { id: Date.now(), text: nS.trim(), cat: nSC, done: false, note: nSN.trim() }] })); setNS(""); setNSC(""); setNSN(""); setSAS(false); }}} bg={T.pri}>Hinzufügen</Btn>
+              </div>
+            </div>
+          )}
+          {grp.map((g) => (
+            <div key={g.id}>
+              <p style={{ fontSize: 10.5, fontWeight: 700, color: g.color, textTransform: "uppercase", letterSpacing: 1, margin: "16px 0 7px" }}>{g.label}</p>
+              {g.items.map((s) => {
+                const isEdit = editS === s.id;
+                return (
+                  <div key={s.id} style={{ marginBottom: 5 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", background: T.card, borderRadius: isEdit ? "10px 10px 0 0" : 10, border: "1px solid " + T.bor, borderLeft: "3px solid " + g.color }}>
+                      <div onClick={() => up((p) => ({ ...p, shopping: p.shopping.map((x) => x.id === s.id ? { ...x, done: !x.done } : x) }))} style={{ width: 21, height: 21, borderRadius: 6, border: "2px solid " + T.bor, background: "white", cursor: "pointer", flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: 13 }}>{s.text}</span>
+                        {s.note && <div style={{ marginTop: 2, fontSize: 10.5, color: s.note.startsWith("http") ? T.pri : T.mut, wordBreak: "break-all" }}>{s.note.startsWith("http") ? "🔗 " : ""}{s.note}</div>}
+                      </div>
+                      <span onClick={(e) => { e.stopPropagation(); if (isEdit) { setEditS(null); } else { setEditS(s.id); setEText(s.text); setECat(s.cat); setENote(s.note || ""); }}} style={{ fontSize: 12, cursor: "pointer", color: T.mut, padding: "2px 4px" }}>✏️</span>
+                    </div>
+                    {isEdit && (
+                      <div style={{ padding: "10px 13px", background: T.card, borderRadius: "0 0 10px 10px", border: "1px solid " + T.bor, borderTop: "1px dashed " + T.bor }}>
+                        <input value={eText} onChange={(e) => setEText(e.target.value)} style={ist} placeholder="Artikel..." />
+                        <select value={eCat} onChange={(e) => setECat(e.target.value)} style={{ ...ist, background: "white" }}>
+                          {SCATS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                        </select>
+                        <input value={eNote} onChange={(e) => setENote(e.target.value)} style={ist} placeholder="Notiz / Link..." />
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <Btn onClick={() => setEditS(null)} color={T.mut}>Abbrechen</Btn>
+                          <Btn onClick={() => { up((p) => ({ ...p, shopping: p.shopping.map((x) => x.id === s.id ? { ...x, text: eText.trim() || x.text, cat: eCat, note: eNote.trim() } : x) })); setEditS(null); }} bg={T.acc}>Speichern</Btn>
+                          <Btn onClick={() => { up((p) => ({ ...p, shopping: p.shopping.filter((x) => x.id !== s.id) })); setEditS(null); }} color={T.pri}>Löschen</Btn>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+          {sD.length > 0 && (
+            <div>
+              <p style={{ fontSize: 10.5, fontWeight: 700, color: T.mut, textTransform: "uppercase", letterSpacing: 1, margin: "16px 0 7px" }}>✓ Besorgt</p>
+              {sD.map((s) => (
+                <div key={s.id} onClick={() => up((p) => ({ ...p, shopping: p.shopping.map((x) => x.id === s.id ? { ...x, done: !x.done } : x) }))} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 13px", background: T.bg, borderRadius: 10, marginBottom: 4, cursor: "pointer", opacity: 0.5 }}>
+                  <div style={{ width: 21, height: 21, borderRadius: 6, background: T.acc, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ color: "white", fontSize: 12 }}>✓</span></div>
+                  <span style={{ textDecoration: "line-through", fontSize: 12.5 }}>{s.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function _Main({ onBack }) {
+  const [projects, setProjects] = useState([
+    { id: 1, title: "🌿 Garten", color: "#52966E", items: [
+      { id: 1, text: "Hochbeet bauen", type: "todo", done: false, who: "papa", notes: [{ by: "papa", text: "Lärche wetterfest" }, { by: "mama", text: "https://www.obi.de/hochbeete" }, { by: "kind", text: "Erdbeeren! 🍓" }] },
+      { id: 2, text: "Kräuter pflanzen", type: "idea", done: false, notes: [{ by: "mama", text: "Basilikum, Rosmarin" }] },
+      { id: 3, text: "Rasen mähen", type: "todo", done: true, who: "papa", notes: [] },
+      { id: 5, text: "Gartenmöbel reinigen", type: "todo", done: false, who: "", notes: [] },
+      { id: 4, text: "Lichterkette Terrasse", type: "idea", done: false, notes: [] },
+    ], shopping: [
+      { id: 1, text: "Lärche-Bretter", cat: "bau", done: false, note: "" },
+      { id: 2, text: "Erde 80L", cat: "online", done: false, note: "https://www.amazon.de/dp/B08XYZ" },
+      { id: 3, text: "Erdbeerpflanzen", cat: "super", done: true, note: "" },
+      { id: 4, text: "Schrauben", cat: "bau", done: false, note: "Edelstahl, rostfrei!" },
+    ] },
+    { id: 2, title: "🛏️ Kinderzimmer", color: "#B07CC6", items: [
+      { id: 1, text: "Schreibtisch", type: "todo", done: false, who: "kind", notes: [{ by: "kind", text: "https://www.ikea.com/malm" }] },
+      { id: 2, text: "Wand streichen?", type: "idea", done: false, notes: [{ by: "kind", text: "Dunkelblau 🌊" }, { by: "mama", text: "Akzentwand?" }] },
+    ], shopping: [
+      { id: 1, text: "MALM Schreibtisch", cat: "moebel", done: false, note: "140x65 weiß" },
+      { id: 2, text: "Wandfarbe Blau", cat: "bau", done: false, note: "Alpina 5L" },
+      { id: 3, text: "LED-Lichterkette", cat: "online", done: false, note: "" },
+    ] },
+  ]);
+  const [openP, setOpenP] = useState(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [nP, setNP] = useState("");
+  const [nPE, setNPE] = useState("📌");
+
+  const proj = openP ? projects.find((p) => p.id === openP) : null;
+
+  return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',sans-serif;background:#F7F3EE;color:#3D405B}input::placeholder{color:#9993A6;opacity:.55}select{font-family:'Outfit',sans-serif}`}</style>
+      <div style={{ padding: "16px 16px 10px", background: "linear-gradient(180deg,white,#F7F3EE)", position: "sticky", top: 0, zIndex: 50 }}>
+        <h1 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 800, fontSize: 24, background: "linear-gradient(135deg,#C25D45,#3D405B)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>FamiliApp</h1>
+        <p style={{ fontSize: 10, color: T.mut, marginTop: 2 }}>Projekte</p>
+      </div>
+
+      {proj ? (
+        <Detail proj={proj} onBack={() => setOpenP(null)} projects={projects} setProjects={setProjects} />
+      ) : (
+        <div style={{ padding: "0 16px 80px" }}>
+          <h2 style={{ fontFamily: "'Playfair Display',serif", fontWeight: 700, fontSize: 21, marginBottom: 14 }}>💡 Projekte</h2>
+          {(() => {
+            const allOpen = projects.flatMap((p) => p.items.filter((i) => i.type === "todo" && !i.done).map((i) => ({ ...i, pTitle: p.title, pColor: p.color })));
+            if (allOpen.length === 0) return null;
+            return (
+              <div style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginBottom: 16, background: "linear-gradient(135deg," + T.pL + "88," + T.card + ")" }}>
+                <p style={{ fontWeight: 700, fontSize: 13, marginBottom: 7 }}>⏰ Ich hab gerade Zeit!</p>
+                <p style={{ fontSize: 11.5, color: T.mut, marginBottom: 8 }}>Offene Aufgaben aus allen Projekten:</p>
+                {allOpen.slice(0, 5).map((it, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "7px 11px", background: "white", borderRadius: 9, marginBottom: 5, fontSize: 12.5, borderLeft: "3px solid " + it.pColor }}>
+                    <span style={{ flex: 1, fontWeight: 600 }}>{it.text}</span>
+                    <span style={{ padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: it.pColor, background: it.pColor + "18" }}>{it.pTitle.split(" ")[0]}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+          {projects.map((p) => {
+            const tc = p.items.filter((x) => x.type === "todo").length;
+            const dc = p.items.filter((x) => x.type === "todo" && x.done).length;
+            const ic = p.items.filter((x) => x.type === "idea").length;
+            const sc = (p.shopping || []).filter((s) => !s.done).length;
+            return (
+              <div key={p.id} onClick={() => setOpenP(p.id)} style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginBottom: 10, cursor: "pointer", borderLeft: "4px solid " + p.color }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 5 }}>{p.title}</h3>
+                <div style={{ display: "flex", gap: 5 }}>
+                  <span style={{ padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: p.color, background: p.color + "18" }}>{dc}/{tc} Aufgaben</span>
+                  <span style={{ padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: T.gld, background: T.gL }}>{ic} Ideen</span>
+                  {sc > 0 && <span style={{ padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700, color: T.pri, background: T.pL }}>🛒 {sc}</span>}
+                </div>
+              </div>
+            );
+          })}
+          {showAdd && (
+            <div style={{ background: T.card, borderRadius: 14, padding: 14, border: "1px solid " + T.bor, marginTop: 8, borderLeft: "4px solid " + T.pri }}>
+              <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>📁 Neues Projekt</p>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
+                {PEMOJIS.map((e) => (
+                  <button key={e} onClick={() => setNPE(e)} style={{ width: 34, height: 34, borderRadius: 8, border: nPE === e ? "2px solid " + T.pri : "1.5px solid " + T.bor, background: nPE === e ? T.pL : "white", fontSize: 16, cursor: "pointer" }}>{e}</button>
+                ))}
+              </div>
+              <input value={nP} onChange={(e) => setNP(e.target.value)} placeholder="Projektname..." autoFocus onKeyDown={(e) => { if (e.key === "Enter" && nP.trim()) { setProjects([...projects, { id: Date.now(), title: nPE + " " + nP.trim(), color: PCOLS[projects.length % PCOLS.length], items: [], shopping: [] }]); setNP(""); setNPE("📌"); setShowAdd(false); }}} style={ist} />
+              <div style={{ display: "flex", gap: 6 }}>
+                <Btn onClick={() => setShowAdd(false)} color={T.mut}>Abbrechen</Btn>
+                <Btn onClick={() => { if (nP.trim()) { setProjects([...projects, { id: Date.now(), title: nPE + " " + nP.trim(), color: PCOLS[projects.length % PCOLS.length], items: [], shopping: [] }]); setNP(""); setNPE("📌"); setShowAdd(false); }}} bg={T.pri}>Erstellen</Btn>
+              </div>
+            </div>
+          )}
+          <button onClick={() => setShowAdd(true)} style={{ position: "fixed", bottom: 24, right: "max(16px,calc(50% - 196px))", width: 48, height: 48, borderRadius: 14, border: "none", background: "linear-gradient(135deg,#C25D45,#C25D45cc)", color: "white", boxShadow: "0 4px 14px #C25D4544", cursor: "pointer", fontSize: 22, fontWeight: 700, zIndex: 90 }}>+</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+  return function(props) {
+    return React.createElement("div", null,
+      React.createElement("div", {
+        onClick: props.onBack,
+        style: { position:"fixed", top:0, left:0, right:0, zIndex:999, maxWidth:420, margin:"0 auto",
+          background:"linear-gradient(180deg,#F7F3EE,rgba(247,243,238,.9))", 
+          padding:"8px 16px 4px", display:"flex", alignItems:"center", gap:8, cursor:"pointer" }
+      },
+        React.createElement("span", { style:{ fontSize:18 } }, "←"),
+        React.createElement("span", { style:{ fontSize:12, fontWeight:700, color:"#9993A6", fontFamily:"'Outfit',sans-serif" } }, "Home")
+      ),
+      React.createElement("div", { style:{ paddingTop:32 } },
+        React.createElement(_Main, props)
+      )
+    );
+  };
+})();
+
+// ── B3: Einstellungen ───────────────────────────
+const EinstellungenApp = (() => {
+  const { useState } = React;
+
+const F0 = [
+  { id: "mama", name: "Mama", emoji: "👩", role: "parent", color: "#C25D45" },
+  { id: "papa", name: "Papa", emoji: "👨", role: "parent", color: "#4A5899" },
+  { id: "kind", name: "Luca", emoji: "🧒", role: "child", color: "#52966E", perms: { sc: false, ct: false, sr: true, se: false } },
+];
+const CL = [["#C25D45","Terrakotta"],["#4A5899","Ozeanblau"],["#52966E","Waldgrün"],["#8B5DAA","Lavendel"],["#D48A3C","Bernstein"],["#3D8E8C","Türkis"],["#C2617B","Rosenholz"],["#5A6577","Schiefer"]];
+const AV = ["👩","👨","🧒","👧","👦","👶","🧑","👱","🐻","🦊","🐰","🦁","🐸","🐼","🦋","🌸","⭐","🚀"];
+const T = { bg:"#F7F3EE", card:"#fff", pri:"#C25D45", pL:"#F5DCD5", sec:"#3D405B", acc:"#52966E", aL:"#D5EADD", txt:"#3D405B", mut:"#9993A6", bor:"#EAE3D9", sh:"0 1px 10px rgba(61,64,91,.05)" };
+const ist = { width:"100%", padding:"9px 12px", borderRadius:10, border:"1.5px solid #EAE3D9", fontSize:13, fontFamily:"'Outfit',sans-serif", outline:"none", marginBottom:6 };
+const DP = { sc:false, ct:false, sr:true, se:false };
+
+function Btn({ children, onClick, color, bg, style: s, disabled }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      padding:"9px 14px", borderRadius:10, border:"none",
+      background: bg || (color || T.pri) + "18",
+      color: bg ? "#fff" : (color || T.pri),
+      fontWeight:700, fontSize:12.5,
+      cursor: disabled ? "default" : "pointer",
+      fontFamily:"'Outfit',sans-serif",
+      opacity: disabled ? 0.5 : 1, ...s
+    }}>{children}</button>
+  );
+}
+
+function Card({ children, style: s }) {
+  return <div style={{ background:T.card, borderRadius:14, padding:14, boxShadow:T.sh, border:"1px solid "+T.bor, ...s }}>{children}</div>;
+}
+
+function Tog({ on, onClick }) {
+  return (
+    <div onClick={onClick} style={{ width:42, height:24, borderRadius:12, background: on ? T.acc : T.bor, padding:2, cursor:"pointer", flexShrink:0 }}>
+      <div style={{ width:20, height:20, borderRadius:10, background:"#fff", transition:"transform .2s", transform: on ? "translateX(18px)" : "translateX(0)", boxShadow:"0 1px 3px rgba(0,0,0,.15)" }}/>
+    </div>
+  );
+}
+
+function SL({ children }) {
+  return <p style={{ fontSize:10.5, fontWeight:700, color:T.mut, textTransform:"uppercase", letterSpacing:1, marginBottom:7, marginTop:16 }}>{children}</p>;
+}
+
+function Overlay({ children }) {
+  return (
+    <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, background:"rgba(0,0,0,.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:300, padding:20 }}>
+      <div style={{ background:T.card, borderRadius:20, padding:24, maxWidth:340, width:"100%", textAlign:"center", animation:"si .25s ease both" }}>{children}</div>
+    </div>
+  );
+}
+
+function Header({ sub }) {
+  return (
+    <div style={{ padding:"16px 16px 10px", background:"linear-gradient(180deg,white,"+T.bg+")", position:"sticky", top:0, zIndex:50 }}>
+      <h1 style={{ fontFamily:"'Playfair Display',serif", fontWeight:800, fontSize:24, background:"linear-gradient(135deg,"+T.pri+","+T.sec+")", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>FamiliApp</h1>
+      <p style={{ fontSize:10, color:T.mut, marginTop:2 }}>{sub}</p>
+    </div>
+  );
+}
+
+function Pill({ children, color, bg }) {
+  return <span style={{ display:"inline-block", padding:"2px 9px", borderRadius:20, fontSize:10.5, fontWeight:700, color, background:bg }}>{children}</span>;
+}
+
+const PF = "'Playfair Display',serif";
+const CSS = `@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Outfit',sans-serif;background:${T.bg};color:${T.txt}}input::placeholder{color:${T.mut};opacity:.55}@keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}`;
+
+function _Main({ onBack }) {
+  const [fam, setFam] = useState(F0);
+  const [view, setView] = useState("main");
+  const [editId, setEditId] = useState(null);
+  const [invS, setInvS] = useState(0);
+  const [invN, setInvN] = useState("");
+  const [invR, setInvR] = useState("child");
+  const [cdel, setCdel] = useState(false);
+  const [pin, setPin] = useState("1234");
+  const [pinOk, setPinOk] = useState(false);
+  const [pV, setPV] = useState(false);
+  const [pIn, setPI] = useState("");
+  const [pE, setPE] = useState(false);
+  const [pCb, setPCb] = useState(null);
+  const [fV, setFV] = useState(false);
+  const [fS, setFS] = useState(0);
+  const [fA, setFA] = useState("");
+  const [fE, setFE] = useState(false);
+  const [n1, setN1] = useState("");
+  const [n2, setN2] = useState("");
+  const [oS, setOS] = useState(0);
+  const [oN, setON] = useState("");
+  const [oE, setOE] = useState("👩");
+  const [oR, setOR] = useState("");
+  const [oP1, setOP1] = useState("");
+  const [oP2, setOP2] = useState("");
+  const [oPE, setOPE] = useState("");
+  const [secA, setSecA] = useState("Luca");
+
+  const used = fam.map(m => m.color);
+  const em = editId !== null ? fam.find(m => m.id === editId) : null;
+  const hp = fam.some(m => m.role === "parent");
+  const isK = em ? em.role === "child" : false;
+  const up = fn => setFam(fam.map(m => m.id === editId ? fn(m) : m));
+  const nxC = () => { const f = CL.find(c => !used.includes(c[0])); return f ? f[0] : "#5A6577"; };
+  const rPin = cb => { if (pinOk) { cb(); return; } setPCb(() => cb); setPV(true); setPI(""); setPE(false); };
+  const goEdit = id => { setEditId(id); setView("edit"); setPinOk(false); setCdel(false); };
+  const goMain = () => { setView("main"); setEditId(null); setPinOk(false); };
+  const goOb = () => { setView("onboard"); setOS(0); setON(""); setOE("👩"); setOR(""); setOP1(""); setOP2(""); setOPE(""); };
+  const finOb = () => { setFam(f => [...f, { id:"u"+Date.now(), name:oN.trim(), emoji:oE, role:oR, color:nxC(), ...(oR==="child" ? {perms:{...DP}} : {}) }]); if(oR==="parent"&&oP1)setPin(oP1); setView("main"); };
+
+  const pinTap = n => {
+    if (n === "⌫") { setPI(v => v.slice(0,-1)); setPE(false); return; }
+    if (pIn.length < 4) {
+      const nx = pIn + n;
+      setPI(nx); setPE(false);
+      if (nx.length === 4) setTimeout(() => {
+        if (nx === pin) { setPinOk(true); setPV(false); if(pCb)pCb(); setPCb(null); }
+        else { setPE(true); setPI(""); }
+      }, 200);
+    }
+  };
+
+  // ── PIN Modal ──
+  const pinModal = pV ? (
+    <Overlay>
+      <div style={{fontSize:36,marginBottom:8}}>🔐</div>
+      <h3 style={{fontFamily:PF,fontSize:18,marginBottom:4}}>Eltern-PIN</h3>
+      <p style={{fontSize:12,color:T.mut,marginBottom:16}}>PIN eingeben</p>
+      <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:12}}>
+        {[0,1,2,3].map(i => <div key={i} style={{width:44,height:52,borderRadius:12,border:pE?"2px solid #D9534F":pIn.length>i?"2px solid "+T.pri:"2px solid "+T.bor,background:pIn.length>i?T.pL:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:800,color:T.pri}}>{pIn.length>i?"•":""}</div>)}
+      </div>
+      {pE && <p style={{fontSize:11,color:"#D9534F",fontWeight:600,marginBottom:8}}>Falscher PIN</p>}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,maxWidth:220,margin:"0 auto 12px"}}>
+        {[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map((n,i) => <button key={i} onClick={() => n!==""&&pinTap(String(n))} style={{padding:"12px 0",borderRadius:10,border:"none",background:n===""?"transparent":n==="⌫"?T.bg:"#fff",boxShadow:n===""||n==="⌫"?"none":T.sh,fontSize:n==="⌫"?18:20,fontWeight:700,cursor:n===""?"default":"pointer",fontFamily:"'Outfit',sans-serif",color:T.txt,visibility:n===""?"hidden":"visible"}}>{n===""?" ":n}</button>)}
+      </div>
+      <div><button onClick={() => {setPV(false);setPCb(null);}} style={{background:"none",border:"none",color:T.mut,fontWeight:600,fontSize:12,cursor:"pointer",fontFamily:"'Outfit',sans-serif"}}>Abbrechen</button></div>
+      <div style={{marginTop:6}}><button onClick={() => {setPV(false);setPCb(null);setFV(true);setFS(0);setFA("");setFE(false);}} style={{background:"none",border:"none",color:T.pri,fontWeight:600,fontSize:11,cursor:"pointer",fontFamily:"'Outfit',sans-serif"}}>PIN vergessen?</button></div>
+    </Overlay>
+  ) : null;
+
+  // ── Forgot Modal ──
+  const fgtModal = fV ? (
+    <Overlay>
+      {fS === 0 ? (
+        <div>
+          <div style={{fontSize:36,marginBottom:8}}>🔑</div>
+          <h3 style={{fontFamily:PF,fontSize:18,marginBottom:4}}>PIN zurücksetzen</h3>
+          <p style={{fontSize:13,fontWeight:700,color:T.sec,marginBottom:10}}>Wie heißt euer erstes Kind?</p>
+          <input value={fA} onChange={e => setFA(e.target.value)} placeholder="Antwort..." style={{...ist,textAlign:"center"}}/>
+          {fE && <p style={{fontSize:11,color:"#D9534F",fontWeight:600,marginTop:4}}>Falsch</p>}
+          <div style={{display:"flex",gap:6,marginTop:8}}>
+            <Btn onClick={() => setFV(false)} color={T.mut} style={{flex:1,textAlign:"center"}}>Abbrechen</Btn>
+            <Btn onClick={() => { fA.trim().toLowerCase()===secA.toLowerCase() ? setFS(1) : setFE(true); }} bg={T.pri} style={{flex:1,textAlign:"center"}}>Weiter</Btn>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div style={{fontSize:36,marginBottom:8}}>🔐</div>
+          <h3 style={{fontFamily:PF,fontSize:18,marginBottom:4}}>Neuer PIN</h3>
+          <input value={n1} onChange={e => setN1(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="Neuer PIN" maxLength={4} style={{...ist,textAlign:"center",fontSize:22,fontWeight:800,letterSpacing:12}}/>
+          <input value={n2} onChange={e => setN2(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="Bestätigen" maxLength={4} style={{...ist,textAlign:"center",fontSize:22,fontWeight:800,letterSpacing:12}}/>
+          {n1.length===4 && n2.length===4 && n1!==n2 && <p style={{fontSize:11,color:"#D9534F",fontWeight:600}}>Nicht gleich</p>}
+          <div style={{display:"flex",gap:6,marginTop:8}}>
+            <Btn onClick={() => setFV(false)} color={T.mut} style={{flex:1,textAlign:"center"}}>Abbrechen</Btn>
+            <Btn onClick={() => { if(n1.length===4&&n1===n2){setPin(n1);setPinOk(true);setFV(false);} }} bg={T.pri} style={{flex:1,textAlign:"center"}} disabled={n1.length<4||n1!==n2}>Speichern</Btn>
+          </div>
+        </div>
+      )}
+    </Overlay>
+  ) : null;
+
+  // ── ONBOARDING ──
+  if (view === "onboard") {
+    return (
+      <div style={{maxWidth:420,margin:"0 auto",minHeight:"100vh",background:T.bg,fontFamily:"'Outfit',sans-serif",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
+        <style>{CSS}</style>
+        <div style={{background:T.card,borderRadius:20,padding:28,width:"100%",textAlign:"center",animation:"si .3s ease both"}}>
+
+          {oS===0 && <div>
+            <div style={{fontSize:48,marginBottom:8}}>👋</div>
+            <h2 style={{fontFamily:PF,fontWeight:800,fontSize:24,marginBottom:6}}>Willkommen!</h2>
+            <p style={{fontSize:13,color:T.mut,marginBottom:16}}>Profil einrichten</p>
+            <input value={oN} onChange={e=>setON(e.target.value)} placeholder="Dein Name" autoFocus style={{...ist,textAlign:"center",fontSize:16}}/>
+            <Btn onClick={() => {if(oN.trim())setOS(1);}} bg={T.pri} style={{width:"100%",textAlign:"center",marginTop:6,padding:12}} disabled={!oN.trim()}>Weiter →</Btn>
+            <div style={{marginTop:10}}><button onClick={() => setView("main")} style={{background:"none",border:"none",color:T.mut,fontWeight:600,fontSize:11,cursor:"pointer",fontFamily:"'Outfit',sans-serif"}}>Abbrechen</button></div>
+          </div>}
+
+          {oS===1 && <div>
+            <h2 style={{fontFamily:PF,fontWeight:800,fontSize:22,marginBottom:14}}>Avatar wählen</h2>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginBottom:16}}>
+              {AV.map(e => <button key={e} onClick={() => setOE(e)} style={{width:46,height:46,borderRadius:12,fontSize:24,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",border:oE===e?"2.5px solid "+T.pri:"1.5px solid "+T.bor,background:oE===e?T.pL:"#fff"}}>{e}</button>)}
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <Btn onClick={() => setOS(0)} color={T.mut} style={{flex:1,textAlign:"center"}}>← Zurück</Btn>
+              <Btn onClick={() => setOS(2)} bg={T.pri} style={{flex:1,textAlign:"center"}}>Weiter →</Btn>
+            </div>
+          </div>}
+
+          {oS===2 && <div>
+            <div style={{fontSize:40,marginBottom:4}}>{oE}</div>
+            <h2 style={{fontFamily:PF,fontWeight:800,fontSize:22,marginBottom:12}}>{oN}, deine Rolle?</h2>
+            <div style={{display:"flex",gap:10,marginBottom:16}}>
+              {[["parent","👨","Erwachsener"],["child","🧒","Kind"]].map(([r,e,l]) => <button key={r} onClick={() => setOR(r)} style={{flex:1,padding:"16px 8px",borderRadius:14,cursor:"pointer",border:oR===r?"2.5px solid "+T.pri:"1.5px solid "+T.bor,background:oR===r?T.pL:"#fff",textAlign:"center",fontFamily:"'Outfit',sans-serif"}}><span style={{fontSize:28,display:"block",marginBottom:4}}>{e}</span><span style={{fontSize:12,fontWeight:700,color:oR===r?T.pri:T.txt}}>{l}</span></button>)}
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <Btn onClick={() => setOS(1)} color={T.mut} style={{flex:1,textAlign:"center"}}>← Zurück</Btn>
+              <Btn onClick={() => {if(!oR)return;oR==="parent"&&!hp?setOS(3):oR==="parent"?setOS(4):finOb();}} bg={T.pri} style={{flex:1,textAlign:"center"}} disabled={!oR}>Weiter →</Btn>
+            </div>
+          </div>}
+
+          {oS===3 && <div>
+            <div style={{fontSize:36,marginBottom:8}}>🔐</div>
+            <h2 style={{fontFamily:PF,fontWeight:800,fontSize:22,marginBottom:6}}>Eltern-PIN</h2>
+            <p style={{fontSize:11,color:T.mut,marginBottom:10}}>Schützt sensible Einstellungen</p>
+            <input value={oP1} onChange={e=>setOP1(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="PIN (4 Ziffern)" maxLength={4} style={{...ist,textAlign:"center",fontSize:22,fontWeight:800,letterSpacing:12}}/>
+            <input value={oP2} onChange={e=>setOP2(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="Bestätigen" maxLength={4} style={{...ist,textAlign:"center",fontSize:22,fontWeight:800,letterSpacing:12}}/>
+            {oPE && <p style={{fontSize:11,color:"#D9534F",fontWeight:600}}>{oPE}</p>}
+            <p style={{fontSize:11,fontWeight:700,color:T.mut,margin:"8px 0 4px",textAlign:"left"}}>Sicherheitsfrage: Name eures Kindes?</p>
+            <input value={secA} onChange={e=>setSecA(e.target.value)} placeholder="Antwort" style={{...ist,textAlign:"center"}}/>
+            <div style={{display:"flex",gap:6,marginTop:8}}>
+              <Btn onClick={() => setOS(2)} color={T.mut} style={{flex:1,textAlign:"center"}}>← Zurück</Btn>
+              <Btn onClick={() => {if(oP1.length<4){setOPE("4 Ziffern nötig");return;}if(oP1!==oP2){setOPE("PINs unterschiedlich");return;}if(!secA.trim()){setOPE("Antwort eingeben");return;}finOb();}} bg={T.pri} style={{flex:1,textAlign:"center"}}>Fertig ✓</Btn>
+            </div>
+          </div>}
+
+          {oS===4 && <div>
+            <div style={{fontSize:36,marginBottom:8}}>🔐</div>
+            <h2 style={{fontFamily:PF,fontWeight:800,fontSize:22,marginBottom:6}}>PIN vorhanden</h2>
+            <p style={{fontSize:12,color:T.mut,marginBottom:14}}>Ein Eltern-PIN ist aktiv und gilt auch für dich.</p>
+            <div style={{padding:14,background:T.aL,borderRadius:12,marginBottom:16}}><p style={{fontSize:12,color:T.acc,fontWeight:600}}>✅ Gilt für alle Erwachsenen</p></div>
+            <div style={{display:"flex",gap:6}}>
+              <Btn onClick={() => setOS(2)} color={T.mut} style={{flex:1,textAlign:"center"}}>← Zurück</Btn>
+              <Btn onClick={finOb} bg={T.pri} style={{flex:1,textAlign:"center"}}>Fertig ✓</Btn>
+            </div>
+          </div>}
+
+        </div>
+      </div>
+    );
+  }
+
+  // ── EDIT ──
+  if (view === "edit" && em) {
+    return (
+      <div style={{maxWidth:420,margin:"0 auto",minHeight:"100vh",background:T.bg,fontFamily:"'Outfit',sans-serif"}}>
+        <style>{CSS}</style>
+        {pinModal}{fgtModal}
+        <Header sub="Profil bearbeiten"/>
+        <div style={{padding:"0 16px 40px"}}>
+          <button onClick={goMain} style={{background:"none",border:"none",color:T.pri,fontWeight:700,fontSize:13,cursor:"pointer",fontFamily:"'Outfit',sans-serif",marginBottom:10,padding:0}}>← Zurück</button>
+          <div style={{textAlign:"center",marginBottom:20}}>
+            <div style={{width:80,height:80,borderRadius:20,margin:"0 auto 8px",background:"linear-gradient(135deg,"+em.color+"22,"+em.color+"08)",border:"3px solid "+em.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:44}}>{em.emoji}</div>
+            <h2 style={{fontFamily:PF,fontWeight:700,fontSize:22}}>{em.name}</h2>
+            <Pill color={isK?T.acc:T.sec} bg={isK?T.aL:T.sec+"12"}>{isK?"Kind":"Erwachsener"}</Pill>
+          </div>
+
+          <SL>😊 Avatar</SL>
+          <Card style={{marginBottom:14}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+              {AV.map(e => <button key={e} onClick={() => up(m=>({...m,emoji:e}))} style={{width:42,height:42,borderRadius:11,fontSize:22,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",border:em.emoji===e?"2.5px solid "+em.color:"1.5px solid "+T.bor,background:em.emoji===e?em.color+"12":"#fff"}}>{e}</button>)}
+            </div>
+          </Card>
+
+          <SL>✏️ Name</SL>
+          <input value={em.name} onChange={e => up(m=>({...m,name:e.target.value}))} style={{...ist,marginBottom:14}}/>
+
+          <SL>🎨 Farbe</SL>
+          <Card style={{marginBottom:14}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
+              {CL.map(c => { const tk = used.includes(c[0]) && em.color!==c[0]; const ac = em.color===c[0]; return (
+                <div key={c[0]} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                  <button onClick={() => {if(!tk)up(m=>({...m,color:c[0]}));}} style={{width:42,height:42,borderRadius:11,background:c[0],cursor:tk?"not-allowed":"pointer",border:ac?"3px solid #fff":"2px solid transparent",boxShadow:ac?"0 0 0 2.5px "+c[0]:"none",opacity:tk?0.2:1}}>{tk?"🔒":""}</button>
+                  <span style={{fontSize:9,color:ac?c[0]:T.mut,fontWeight:ac?700:500}}>{c[1]}</span>
+                </div>
+              ); })}
+            </div>
+          </Card>
+
+          {isK && em.perms && <div>
+            <SL>🔑 Berechtigungen</SL>
+            {pinOk ? (
+              <Card>
+                {[["sc","Selbst bestätigen","✅"],["ct","Aufgaben anlegen","📋"],["sr","Wünsche vorschlagen","💫"],["se","Ziele festlegen","🎯"]].map(([k,l,ic],i) => (
+                  <div key={k} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:i<3?"1px solid "+T.bor:"none"}}>
+                    <Tog on={em.perms[k]} onClick={() => up(m=>({...m,perms:{...m.perms,[k]:!m.perms[k]}}))}/>
+                    <div style={{fontSize:13,fontWeight:600}}>{ic} {l}</div>
+                  </div>
+                ))}
+              </Card>
+            ) : (
+              <Card style={{borderLeft:"3.5px solid "+T.bor,opacity:0.7}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div><div style={{fontSize:13,fontWeight:600,color:T.mut}}>🔒 Berechtigungen</div><div style={{fontSize:11,color:T.mut}}>Eltern-PIN nötig</div></div>
+                  <Btn onClick={() => rPin(()=>{})}>Entsperren</Btn>
+                </div>
+              </Card>
+            )}
+          </div>}
+
+          <SL>🔔 Benachrichtigungen</SL>
+          <Card>
+            {[["rT","Aufgaben-Erinnerungen","⏰"],["rS","Einkaufs-Updates","🛒"],["rR","Meilensteine","🎉"],["dS","Zusammenfassung","📋"]].map(([k,l,ic],i) => (
+              <div key={k} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:i<3?"1px solid "+T.bor:"none"}}>
+                <Tog on={em.notifs ? em.notifs[k]!==false : true} onClick={() => { const c = em.notifs || {rT:true,rS:true,rR:true,dS:true}; up(m=>({...m,notifs:{...c,[k]:!c[k]}})); }}/>
+                <div style={{fontSize:13,fontWeight:600}}>{ic} {l}</div>
+              </div>
+            ))}
+          </Card>
+
+          <SL>🔄 Rolle</SL>
+          {pinOk ? (
+            <Card>
+              <p style={{fontSize:12,color:T.mut,marginBottom:10}}>{em.name}: <b>{isK?"Kind":"Erwachsener"}</b></p>
+              <div style={{display:"flex",gap:8}}>
+                {[["parent","👨","Erwachsener"],["child","🧒","Kind"]].map(([r,e,l]) => (
+                  <button key={r} onClick={() => { const u={...em,role:r}; if(r==="child"&&!em.perms)u.perms={...DP}; if(r==="parent")delete u.perms; setFam(fam.map(m=>m.id===em.id?u:m)); }} style={{flex:1,padding:"12px 8px",borderRadius:12,cursor:"pointer",textAlign:"center",fontFamily:"'Outfit',sans-serif",border:em.role===r?"2.5px solid "+em.color:"1.5px solid "+T.bor,background:em.role===r?em.color+"12":"#fff"}}>
+                    <span style={{fontSize:22,display:"block",marginBottom:2}}>{e}</span>
+                    <span style={{fontSize:12,fontWeight:700,color:em.role===r?em.color:T.mut}}>{l}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <Card style={{borderLeft:"3.5px solid "+T.bor,opacity:0.7}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div><div style={{fontSize:13,fontWeight:600,color:T.mut}}>🔒 Rolle wechseln</div><div style={{fontSize:11,color:T.mut}}>Eltern-PIN nötig</div></div>
+                <Btn onClick={() => rPin(()=>{})}>Entsperren</Btn>
+              </div>
+            </Card>
+          )}
+
+          <SL>⚠️ Gefahrenzone</SL>
+          {pinOk ? (
+            cdel ? (
+              <Card style={{borderLeft:"3.5px solid #D9534F"}}>
+                <p style={{fontSize:13,fontWeight:700,color:"#D9534F",marginBottom:8}}>Wirklich entfernen?</p>
+                <div style={{display:"flex",gap:6}}>
+                  <Btn onClick={() => setCdel(false)} color={T.mut} style={{flex:1,textAlign:"center"}}>Nein</Btn>
+                  <Btn onClick={() => {setFam(fam.filter(m=>m.id!==em.id));goMain();}} bg="#D9534F" style={{flex:1,textAlign:"center"}}>Ja, entfernen</Btn>
+                </div>
+              </Card>
+            ) : (
+              <Card style={{borderLeft:"3.5px solid "+T.bor}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div style={{fontSize:13,fontWeight:600}}>🗑️ {em.name} entfernen</div>
+                  <Btn onClick={() => setCdel(true)} color="#D9534F">Entfernen</Btn>
+                </div>
+              </Card>
+            )
+          ) : (
+            <Card style={{borderLeft:"3.5px solid "+T.bor,opacity:0.7}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div><div style={{fontSize:13,fontWeight:600,color:T.mut}}>🔒 Mitglied entfernen</div><div style={{fontSize:11,color:T.mut}}>Eltern-PIN nötig</div></div>
+                <Btn onClick={() => rPin(()=>{})}>Entsperren</Btn>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── MAIN ──
+  return (
+    <div style={{maxWidth:420,margin:"0 auto",minHeight:"100vh",background:T.bg,fontFamily:"'Outfit',sans-serif"}}>
+      <style>{CSS}</style>
+      {pinModal}{fgtModal}
+      <Header sub="Einstellungen"/>
+      <div style={{padding:"0 16px 40px"}}>
+        <h2 style={{fontFamily:PF,fontWeight:700,fontSize:21,marginBottom:3}}>⚙️ Einstellungen</h2>
+        <p style={{fontSize:12,color:T.mut,marginBottom:14}}>Profile & Familie verwalten</p>
+
+        <SL>👨‍👩‍👧 Familienmitglieder</SL>
+        {fam.map(m => (
+          <Card key={m.id} style={{marginBottom:8,cursor:"pointer",borderLeft:"4px solid "+m.color}}>
+            <div onClick={() => goEdit(m.id)} style={{display:"flex",alignItems:"center",gap:12}}>
+              <div style={{width:48,height:48,borderRadius:14,background:"linear-gradient(135deg,"+m.color+"18,"+m.color+"08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>{m.emoji}</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:15}}>{m.name}</div>
+                <Pill color={m.role==="child"?T.acc:T.sec} bg={m.role==="child"?T.aL:T.sec+"12"}>{m.role==="child"?"Kind":"Erwachsener"}</Pill>
+              </div>
+              <span style={{fontSize:18,color:T.mut}}>✏️</span>
+            </div>
+          </Card>
+        ))}
+
+        <Btn onClick={() => {setInvS(1);setInvN("");setInvR("child");}} style={{marginTop:12,display:"block",width:"100%",textAlign:"center",padding:14}}>+ Mitglied einladen</Btn>
+
+        <SL>🔐 Eltern-PIN</SL>
+        <Card>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div><div style={{fontSize:13,fontWeight:600}}>PIN aktiv</div><div style={{fontSize:11,color:T.mut,marginTop:1}}>Schützt Berechtigungen & Rollen</div></div>
+            <Btn onClick={() => rPin(() => {setFV(true);setFS(1);setN1("");setN2("");})}>Ändern</Btn>
+          </div>
+        </Card>
+
+        <SL>🧪 Prototyp</SL>
+        <Btn onClick={goOb} color={T.sec} style={{display:"block",width:"100%",textAlign:"center",padding:14}}>📱 Onboarding testen</Btn>
+      </div>
+
+      {invS > 0 && (
+        <Overlay>
+          {invS === 1 ? (
+            <div>
+              <h3 style={{fontFamily:PF,fontSize:18,marginBottom:14}}>👋 Neues Mitglied</h3>
+              <input value={invN} onChange={e => setInvN(e.target.value)} placeholder="Name" style={ist}/>
+              <div style={{display:"flex",gap:8,marginBottom:12}}>
+                {[["child","🧒","Kind"],["parent","👨","Erwachsener"]].map(([r,e,l]) => <button key={r} onClick={() => setInvR(r)} style={{flex:1,padding:"12px 8px",borderRadius:12,cursor:"pointer",border:invR===r?"2.5px solid "+T.pri:"1.5px solid "+T.bor,background:invR===r?T.pL:"#fff",textAlign:"center",fontFamily:"'Outfit',sans-serif"}}><span style={{fontSize:22,display:"block"}}>{e}</span><span style={{fontSize:11,fontWeight:700,color:invR===r?T.pri:T.mut}}>{l}</span></button>)}
+              </div>
+              <Btn onClick={() => {if(!invN.trim())return;setFam(f=>[...f,{id:"n"+Date.now(),name:invN.trim(),emoji:invR==="child"?"👧":"🧑",role:invR,color:nxC(),...(invR==="child"?{perms:{...DP}}:{})}]);setInvS(2);}} bg={T.pri} style={{width:"100%",textAlign:"center",marginBottom:8}}>Erstellen</Btn>
+              <Btn onClick={() => setInvS(0)} color={T.mut} style={{width:"100%",textAlign:"center"}}>Abbrechen</Btn>
+            </div>
+          ) : (
+            <div>
+              <span style={{fontSize:48,display:"block",marginBottom:8}}>🎉</span>
+              <h3 style={{fontFamily:PF,fontSize:18,marginBottom:6}}>Einladung erstellt!</h3>
+              <div style={{padding:14,background:T.bg,borderRadius:12,marginBottom:12}}><p style={{fontSize:11,color:T.sec,wordBreak:"break-all"}}>https://familiapp.local/invite/a8f3...</p></div>
+              <Btn onClick={() => setInvS(0)} bg={T.pri} style={{width:"100%",textAlign:"center"}}>Fertig</Btn>
+            </div>
+          )}
+        </Overlay>
+      )}
+    </div>
+  );
+}
+
+  return function(props) {
+    return React.createElement("div", null,
+      React.createElement("div", {
+        onClick: props.onBack,
+        style: { position:"fixed", top:0, left:0, right:0, zIndex:999, maxWidth:420, margin:"0 auto",
+          background:"linear-gradient(180deg,#F7F3EE,rgba(247,243,238,.9))", 
+          padding:"8px 16px 4px", display:"flex", alignItems:"center", gap:8, cursor:"pointer" }
+      },
+        React.createElement("span", { style:{ fontSize:18 } }, "←"),
+        React.createElement("span", { style:{ fontSize:12, fontWeight:700, color:"#9993A6", fontFamily:"'Outfit',sans-serif" } }, "Home")
+      ),
+      React.createElement("div", { style:{ paddingTop:32 } },
+        React.createElement(_Main, props)
+      )
+    );
+  };
+})();
+
+// ── Haupt-App ───────────────────────────────────
+
+const { useState } = React;
+
+function App() {
+  const [section, setSection] = useState("home");
+
+  const T = {
+    bg: "#F7F3EE", card: "#fff", pri: "#C25D45", pL: "#F5DCD5",
+    sec: "#3D405B", acc: "#52966E", aL: "#D5EADD", gld: "#D9A632",
+    gL: "#FDF4D8", txt: "#3D405B", mut: "#9993A6", bor: "#EAE3D9",
+    sh: "0 1px 10px rgba(61,64,91,.05)",
+  };
+  const PF = "'Playfair Display',serif";
+
+  if (section === "einkauf") return <EinkaufApp onBack={() => setSection("home")} />;
+  if (section === "aufgaben") return <AufgabenApp onBack={() => setSection("home")} />;
+  if (section === "projekte") return <ProjekteApp onBack={() => setSection("home")} />;
+  if (section === "settings") return <EinstellungenApp onBack={() => setSection("home")} />;
+
+  const sections = [
+    { id: "einkauf", emoji: "🛒", title: "Einkauf & Küche", desc: "Vorräte, Einkaufsliste & Rezepte", color: T.acc, bg: T.aL },
+    { id: "aufgaben", emoji: "✅", title: "Aufgaben", desc: "Familien-Tasks & Belohnungen", color: T.pri, bg: T.pL },
+    { id: "projekte", emoji: "📋", title: "Projekte", desc: "Einkaufslisten & Familienprojekte", color: "#4A5899", bg: "#E0E4F0" },
+    { id: "settings", emoji: "⚙️", title: "Einstellungen", desc: "Familie, Profile & Optionen", color: T.sec, bg: "#E8E6ED" },
+  ];
+
+  return (
+    <div style={{ maxWidth: 420, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Outfit',sans-serif" }}>
+      <div style={{ padding: "40px 16px 12px", textAlign: "center" }}>
+        <div style={{ fontSize: 40, marginBottom: 8 }}>🏠</div>
+        <h1 style={{ fontFamily: PF, fontWeight: 800, fontSize: 32, background: "linear-gradient(135deg," + T.pri + "," + T.sec + ")", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 4 }}>FamiliApp</h1>
+        <p style={{ fontSize: 13, color: T.mut }}>Willkommen! Wähle einen Bereich.</p>
+      </div>
+
+      <div style={{ padding: "12px 16px 40px" }}>
+        {sections.map((s, i) => (
+          <div key={s.id} onClick={() => setSection(s.id)} style={{
+            background: T.card, borderRadius: 16, padding: 18, marginBottom: 12,
+            boxShadow: T.sh, border: "1px solid " + T.bor, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 14,
+            borderLeft: "4px solid " + s.color,
+            animation: "fu .4s ease " + (i * 0.08) + "s both",
+          }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 14, background: s.bg,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 26, flexShrink: 0
+            }}>{s.emoji}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: T.txt }}>{s.title}</div>
+              <div style={{ fontSize: 12, color: T.mut, marginTop: 2 }}>{s.desc}</div>
+            </div>
+            <span style={{ fontSize: 20, color: T.bor, fontWeight: 300 }}>›</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ textAlign: "center", padding: "0 16px 40px" }}>
+        <p style={{ fontSize: 11, color: T.mut + "88" }}>FamiliApp Prototyp · v1.0</p>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+  </script>
+</body>
+</html>
